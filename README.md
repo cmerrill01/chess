@@ -1,5 +1,5 @@
 # chess
 
 - [x] Create GitHub repository
-- [ ] Initialize IntelliJ project
+- [x] Initialize IntelliJ project
 - [ ] Add dependencies
