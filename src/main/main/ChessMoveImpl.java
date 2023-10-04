@@ -1,5 +1,6 @@
 package main;
 
+import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
@@ -37,6 +38,10 @@ public class ChessMoveImpl implements ChessMove {
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
+    }
+
+    public boolean isCapture(ChessBoard board) {
+        return (board.getPiece(endPosition).getTeamColor() != board.getPiece(startPosition).getTeamColor());
     }
 
     @Override

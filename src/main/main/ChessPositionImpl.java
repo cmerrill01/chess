@@ -48,6 +48,10 @@ public class ChessPositionImpl implements ChessPosition {
         return (row > 0 && row <= board.getMaxRow() && col > 0 && col <= board.getMaxColumn());
     }
 
+    public boolean occupied(ChessBoard board) {
+        return (board.getPiece(this) != null);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(row, col);

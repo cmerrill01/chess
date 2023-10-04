@@ -35,35 +35,53 @@ public class Bishop implements ChessPiece {
         // decrement both the row and column
         toPosition.decrementRow();
         toPosition.decrementColumn();
-        // while the new Position is on the board,
-        while (toPosition.onBoard(board) && !positionOccupied(board, validMoves, myPosition, toPosition)) {
-            // decrement both the row and column by one
-            toPosition.decrementRow();
-            toPosition.decrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and decrement both the row and column
+                toPosition.decrementRow();
+                toPosition.decrementColumn();
+            }
         }
 
         // Get the row and column of the starting position
         toPosition.setToPosition(myPosition);
-        // decrement the row and increment the column
-        toPosition.decrementRow();
-        toPosition.incrementColumn();
-        // while the new Position is on the board,
-        while (toPosition.onBoard(board) && !positionOccupied(board, validMoves, myPosition, toPosition)) {
-            // decrement the row and increment the column
-            toPosition.decrementRow();
-            toPosition.incrementColumn();
-        }
-
-        // Get the row and column of the starting position
-        toPosition.setToPosition(myPosition);
-        // increment the row and increment the column
+        // increment both the row and column
         toPosition.incrementRow();
         toPosition.incrementColumn();
-        // while the new Position is on the board,
-        while (toPosition.onBoard(board) && !positionOccupied(board, validMoves, myPosition, toPosition)) {
-            // increment the row and increment the column
-            toPosition.incrementRow();
-            toPosition.incrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and increment both the row and column
+                toPosition.incrementRow();
+                toPosition.incrementColumn();
+            }
         }
 
         // Get the row and column of the starting position
@@ -71,40 +89,55 @@ public class Bishop implements ChessPiece {
         // increment the row and decrement the column
         toPosition.incrementRow();
         toPosition.decrementColumn();
-        // while the new position is on the board and the position is not occupied
-        while (toPosition.onBoard(board) && !positionOccupied(board, validMoves, myPosition, toPosition)) {
-            // increment the row and decrement the column
-            toPosition.incrementRow();
-            toPosition.decrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and increment the row and decrement the column
+                toPosition.incrementRow();
+                toPosition.decrementColumn();
+            }
+        }
+
+        // Get the row and column of the starting position
+        toPosition.setToPosition(myPosition);
+        // decrement the row and increment the column
+        toPosition.decrementRow();
+        toPosition.incrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and decrement the row and increment column
+                toPosition.decrementRow();
+                toPosition.incrementColumn();
+            }
         }
 
         return validMoves;
     }
-
-    private boolean positionOccupied(ChessBoard board,
-                              Collection<ChessMove> validMoves,
-                              ChessPosition startPosition,
-                              ChessPosition toPosition
-                              ) {
-        boolean occupied = false;
-        // if there is a piece at this position
-        if (board.getPiece(toPosition) != null) {
-            // if the piece is not the same color as this piece,
-            if (board.getPiece(toPosition).getTeamColor() != this.team) {
-                // create a new move from the starting position to this position
-                ChessMove validMove = new ChessMoveImpl(startPosition, toPosition);
-                // add this move to the collection
-                validMoves.add(validMove);
-            }
-            // indicate that the space is occupied
-            occupied = true;
-        } else {
-            // create a new move from the starting position to this position
-            ChessMove validMove = new ChessMoveImpl(startPosition, toPosition);
-            // add this move to the collection
-            validMoves.add(validMove);
-        }
-        return occupied;
-    }
-
 }
