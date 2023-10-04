@@ -131,7 +131,7 @@ public class KingMoveTests {
 
 
     @Test
-    @DisplayName("King Completely Blocked")
+    @DisplayName("main.King Completely Blocked")
     public void kingStuck() {
 
         /*

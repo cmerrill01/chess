@@ -26,6 +26,16 @@ public interface ChessBoard {
     ChessPiece getPiece(ChessPosition position);
 
     /**
+     * Gets the maximum row number of the board
+     */
+    public int getMaxRow();
+
+    /**
+     * Gets the maximum column number of the board
+     */
+    public int getMaxColumn();
+
+    /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */

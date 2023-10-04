@@ -1,3 +1,5 @@
+package main;
+
 import chess.ChessBoard;
 import chess.ChessPiece;
 import chess.ChessPosition;
@@ -14,12 +16,20 @@ public class ChessBoardImpl implements ChessBoard {
 
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
-
+        board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     @Override
     public ChessPiece getPiece(ChessPosition position) {
-        return null;
+        return board[position.getRow() - 1][position.getColumn() - 1];
+    }
+
+    public int getMaxRow() {
+        return numRows;
+    }
+
+    public int getMaxColumn() {
+        return  numCols;
     }
 
     @Override

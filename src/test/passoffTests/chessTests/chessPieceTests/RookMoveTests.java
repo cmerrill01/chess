@@ -145,7 +145,7 @@ public class RookMoveTests {
 
 
     @Test
-    @DisplayName("Rook Completely Blocked")
+    @DisplayName("main.Rook Completely Blocked")
     public void rookStuck() {
 
         /*
