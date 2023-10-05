@@ -55,11 +55,32 @@ public class ChessMoveImpl implements ChessMove {
         if (obj == null) return false;
         if (obj instanceof ChessMoveImpl) {
             ChessMove other = (ChessMoveImpl) obj;
-            return (this.startPosition == other.getStartPosition() &&
-                    this.endPosition == other.getEndPosition() &&
-                    this.promotionPiece == other.getPromotionPiece());
+            // check whether the promotion pieces are equal
+            if (promotionPiecesEqual(other)) {
+                return (this.startPosition.equals(other.getStartPosition()) &&
+                        this.endPosition.equals(other.getEndPosition()));
+            }
         }
         return false;
+    }
+
+    private boolean promotionPiecesEqual(ChessMove other) {
+        boolean promotionPiecesEqual;
+        // if this promotion piece is null
+        if (this.promotionPiece == null) {
+            // then if the other promotion piece is null, they're equal;
+            // otherwise, they're not
+            promotionPiecesEqual = other.getPromotionPiece() == null;
+        } else {
+            // if the promotion piece is not null,
+            // then if the other is not null,
+            if (other.getPromotionPiece() != null) {
+                // check to see if they're the same
+                promotionPiecesEqual = this.promotionPiece == other.getPromotionPiece();
+                // if the other is null, return falls
+            } else promotionPiecesEqual = false;
+        }
+        return promotionPiecesEqual;
     }
 
     @Override
