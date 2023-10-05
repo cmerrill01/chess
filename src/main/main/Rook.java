@@ -3,6 +3,7 @@ package main;
 import chess.*;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 public class Rook implements ChessPiece {
 
@@ -25,6 +26,109 @@ public class Rook implements ChessPiece {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return null;
+        // Create a hashset of valid moves to return once populated
+        Collection<ChessMove> validMoves = new HashSet<>();
+
+        // Get the row and column of the starting position
+        ChessPositionImpl toPosition = new ChessPositionImpl(myPosition);
+        // decrement the row
+        toPosition.decrementRow();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and decrement the row
+                toPosition.decrementRow();
+            }
+        }
+
+        // Get the start position
+        toPosition.setToPosition(myPosition);
+        // increment the row
+        toPosition.incrementRow();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and increment the row
+                toPosition.incrementRow();
+            }
+        }
+
+        // get the start position
+        toPosition.setToPosition(myPosition);
+        // decrement the column
+        toPosition.decrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and decrement the row
+                toPosition.decrementColumn();
+            }
+        }
+
+        // get the start position
+        toPosition.setToPosition(myPosition);
+        // increment the column
+        toPosition.incrementColumn();
+        // while this position is on the board
+        while (toPosition.onBoard(board)) {
+            // create a move from the starting position to this position
+            ChessMoveImpl move = new ChessMoveImpl(myPosition, toPosition);
+            // if this position is occupied,
+            if (toPosition.occupied(board)) {
+                // if it is occupied by an enemy piece
+                if (move.isCapture(board)) {
+                    // add the move to the set of valid moves
+                    validMoves.add(move);
+                }
+                // break out of the loop
+                break;
+            } else {
+                // otherwise, add the move to the set of valid moves
+                validMoves.add(move);
+                // and increment the column
+                toPosition.incrementColumn();
+            }
+        }
+
+        return validMoves;
     }
 }
