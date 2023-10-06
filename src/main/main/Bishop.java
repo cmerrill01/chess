@@ -17,7 +17,7 @@ public class Bishop implements ChessPiece {
 
     @Override
     public String toString() {
-        return (team == ChessGame.TeamColor.WHITE ? "B" : "b");
+        return (team == ChessGame.TeamColor.WHITE ? "b" : "B");
     }
 
     @Override

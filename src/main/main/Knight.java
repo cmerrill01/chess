@@ -16,7 +16,7 @@ public class Knight implements ChessPiece {
 
     @Override
     public String toString() {
-        return (team == ChessGame.TeamColor.WHITE ? "N" : "n");
+        return (team == ChessGame.TeamColor.WHITE ? "n" : "N");
     }
 
     @Override

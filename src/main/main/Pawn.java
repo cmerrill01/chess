@@ -16,7 +16,7 @@ public class Pawn implements ChessPiece {
 
     @Override
     public String toString() {
-        return (team == ChessGame.TeamColor.WHITE ? "P" : "p");
+        return (team == ChessGame.TeamColor.WHITE ? "p" : "P");
     }
 
     @Override

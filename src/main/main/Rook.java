@@ -16,7 +16,7 @@ public class Rook implements ChessPiece {
 
     @Override
     public String toString() {
-        return (team == ChessGame.TeamColor.WHITE ? "R" : "r");
+        return (team == ChessGame.TeamColor.WHITE ? "r" : "R");
     }
 
     @Override
