@@ -1,12 +1,13 @@
 package main;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
 public class ChessBoardImpl implements ChessBoard {
 
-    private ChessPiece[][] board;
+    private final ChessPiece[][] board;
     private final int numRows = 8;
     private final int numCols = 8;
 
@@ -34,7 +35,32 @@ public class ChessBoardImpl implements ChessBoard {
 
     @Override
     public void resetBoard() {
-
+        for (int i = 0; i < numCols; i++) {
+            switch (i) {
+                case 0, 7 -> {
+                    board[0][i] = new Rook(ChessGame.TeamColor.WHITE);
+                    board[7][i] = new Rook(ChessGame.TeamColor.BLACK);
+                }
+                case 1, 6 -> {
+                    board[0][i] = new Knight(ChessGame.TeamColor.WHITE);
+                    board[7][i] = new Knight(ChessGame.TeamColor.BLACK);
+                }
+                case 2, 5 -> {
+                    board[0][i] = new Bishop(ChessGame.TeamColor.WHITE);
+                    board[7][i] = new Bishop(ChessGame.TeamColor.BLACK);
+                }
+                case 3 -> {
+                    board[0][i] = new Queen(ChessGame.TeamColor.WHITE);
+                    board[7][i] = new Queen(ChessGame.TeamColor.BLACK);
+                }
+                case 4 -> {
+                    board[0][i] = new King(ChessGame.TeamColor.WHITE);
+                    board[7][i] = new King(ChessGame.TeamColor.BLACK);
+                }
+            }
+            board[1][i] = new Pawn(ChessGame.TeamColor.WHITE);
+            board[6][i] = new Pawn(ChessGame.TeamColor.BLACK);
+        }
     }
 
     @Override
