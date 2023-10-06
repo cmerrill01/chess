@@ -15,6 +15,11 @@ public class Rook implements ChessPiece {
     }
 
     @Override
+    public String toString() {
+        return (team == ChessGame.TeamColor.WHITE ? "R" : "r");
+    }
+
+    @Override
     public ChessGame.TeamColor getTeamColor() {
         return team;
     }

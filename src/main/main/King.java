@@ -15,6 +15,11 @@ public class King implements ChessPiece {
     }
 
     @Override
+    public String toString() {
+        return (team == ChessGame.TeamColor.WHITE ? "K" : "k");
+    }
+
+    @Override
     public ChessGame.TeamColor getTeamColor() {
         return team;
     }
