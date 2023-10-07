@@ -17,12 +17,12 @@ public class ChessBoardImpl implements ChessBoard {
 
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getRow() - 1][position.getColumn() - 1] = piece;
+        board[8 - position.getRow()][position.getColumn() - 1] = piece;
     }
 
     @Override
     public ChessPiece getPiece(ChessPosition position) {
-        return board[position.getRow() - 1][position.getColumn() - 1];
+        return board[8 - position.getRow()][position.getColumn() - 1];
     }
 
     public int getMaxRow() {
@@ -38,28 +38,28 @@ public class ChessBoardImpl implements ChessBoard {
         for (int i = 0; i < numCols; i++) {
             switch (i) {
                 case 0, 7 -> {
-                    board[0][i] = new Rook(ChessGame.TeamColor.WHITE);
-                    board[7][i] = new Rook(ChessGame.TeamColor.BLACK);
+                    board[0][i] = new Rook(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new Rook(ChessGame.TeamColor.WHITE);
                 }
                 case 1, 6 -> {
-                    board[0][i] = new Knight(ChessGame.TeamColor.WHITE);
-                    board[7][i] = new Knight(ChessGame.TeamColor.BLACK);
+                    board[0][i] = new Knight(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new Knight(ChessGame.TeamColor.WHITE);
                 }
                 case 2, 5 -> {
-                    board[0][i] = new Bishop(ChessGame.TeamColor.WHITE);
-                    board[7][i] = new Bishop(ChessGame.TeamColor.BLACK);
+                    board[0][i] = new Bishop(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new Bishop(ChessGame.TeamColor.WHITE);
                 }
                 case 3 -> {
-                    board[0][i] = new Queen(ChessGame.TeamColor.WHITE);
-                    board[7][i] = new Queen(ChessGame.TeamColor.BLACK);
+                    board[0][i] = new Queen(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new Queen(ChessGame.TeamColor.WHITE);
                 }
                 case 4 -> {
-                    board[0][i] = new King(ChessGame.TeamColor.WHITE);
-                    board[7][i] = new King(ChessGame.TeamColor.BLACK);
+                    board[0][i] = new King(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new King(ChessGame.TeamColor.WHITE);
                 }
             }
-            board[1][i] = new Pawn(ChessGame.TeamColor.WHITE);
-            board[6][i] = new Pawn(ChessGame.TeamColor.BLACK);
+            board[1][i] = new Pawn(ChessGame.TeamColor.BLACK);
+            board[6][i] = new Pawn(ChessGame.TeamColor.WHITE);
         }
     }
 
