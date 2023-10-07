@@ -149,7 +149,55 @@ public class ChessGameImpl implements ChessGame {
 
     @Override
     public boolean isInStalemate(TeamColor teamColor) {
-        return false;
+        // first, assume that this team is not in stalemate
+        boolean inStalemate = false;
+        // if this team is NOT in check,
+        if (!isInCheck(teamColor)) {
+            // assume this team is in stalemate
+            inStalemate = true;
+            // iterate through all positions on the board
+            for (int i = 1; i <= board.getMaxRow(); i++) {
+                for (int j = 1; j <= board.getMaxColumn(); j++) {
+                    ChessPosition position = new ChessPositionImpl(i, j);
+                    // if there is a piece at the current position that belongs to this team,
+                    if (board.getPiece(position) != null &&
+                            board.getPiece(position).getTeamColor() == teamColor) {
+                        // iterate through all this piece's moves
+                        for (ChessMove move : board.getPiece(position).pieceMoves(board, position)) {
+                            // make the move
+                            ChessPiece capturedPiece = null;
+                            if (board.getPiece(move.getEndPosition()) != null) {
+                                capturedPiece = board.getPiece(move.getEndPosition());
+                            }
+                            board.movePiece(move);
+                            // if this team is still not in check,
+                            if (!isInCheck(teamColor)) {
+                                // this team is not in stalemate
+                                inStalemate = false;
+                                // reverse the move
+                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                        move.getStartPosition());
+                                board.movePiece(reverseMove);
+                                if (capturedPiece != null) {
+                                    board.addPiece(move.getEndPosition(), capturedPiece);
+                                }
+                                // break out of the loop
+                                break;
+                            } else {
+                                // reverse the move
+                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                        move.getStartPosition());
+                                board.movePiece(reverseMove);
+                                if (capturedPiece != null) {
+                                    board.addPiece(move.getEndPosition(), capturedPiece);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return inStalemate;
     }
 
     @Override

@@ -24,10 +24,23 @@ public class ChessBoardImpl implements ChessBoard {
 
     @Override
     public void movePiece(ChessMove move) {
-        board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] =
-                board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1];
-        board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1] = null;
+        if (move.getPromotionPiece() != null) {
+            ChessGame.TeamColor pieceTeam = board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1].getTeamColor();
+            board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1] = null;
+            switch (move.getPromotionPiece()) {
+                case BISHOP -> board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] = new Bishop(pieceTeam);
+                case KNIGHT -> board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] = new Knight(pieceTeam);
+                case QUEEN -> board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] = new Queen(pieceTeam);
+                case ROOK -> board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] = new Rook(pieceTeam);
+            }
+        } else {
+            board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] =
+                    board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1];
+            board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1] = null;
+        }
     }
+
+
 
     public int getMaxRow() {
         return numRows;

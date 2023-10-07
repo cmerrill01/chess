@@ -48,8 +48,9 @@ public class TestFactory {
 		return new ChessPositionImpl(row, col);
     }
 
-    public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece){
-		return new ChessMoveImpl(startPosition, endPosition);
+    public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece) {
+		if (promotionPiece != null) return new ChessMoveImpl(startPosition, endPosition, promotionPiece);
+        else return new ChessMoveImpl(startPosition, endPosition);
     }
     //------------------------------------------------------------------------------------------------------------------
 

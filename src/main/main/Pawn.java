@@ -4,6 +4,7 @@ import chess.*;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class Pawn implements ChessPiece {
 
@@ -35,6 +36,13 @@ public class Pawn implements ChessPiece {
         int direction = (team == ChessGame.TeamColor.WHITE ? 1 : -1);
         boolean firstMove = ((team == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) ||
                 team == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7);
+        // prepare the information to enable promotions
+        int promotionRow = (team == ChessGame.TeamColor.WHITE ? 8 : 1);
+        Collection<PieceType> promotionPieces = new HashSet<>();
+        promotionPieces.add(PieceType.BISHOP);
+        promotionPieces.add(PieceType.KNIGHT);
+        promotionPieces.add(PieceType.QUEEN);
+        promotionPieces.add(PieceType.ROOK);
 
         // find the position directly forward from the starting position
         ChessPositionImpl forward = new ChessPositionImpl(myPosition.getRow() + direction, myPosition.getColumn());
@@ -42,14 +50,23 @@ public class Pawn implements ChessPiece {
         if (forward.onBoard(board)) {
             // if it's not occupied
             if (!forward.occupied(board)) {
-                // add a move from the starting position to here
-                validMoves.add(new ChessMoveImpl(myPosition, forward));
-                // if the pawn is in its starting position
-                if (firstMove) {
-                    // find the position two spaces forward from the starting position
-                    ChessPositionImpl twoForward = new ChessPositionImpl(forward.getRow() + direction, forward.getColumn());
-                    // if this position is not occupied, add a move from the starting position to here
-                    if (!twoForward.occupied(board)) validMoves.add(new ChessMoveImpl(myPosition, twoForward));
+                // if the move takes it to the promotion row,
+                if (forward.getRow() == promotionRow) {
+                    // for each possible promotion piece,
+                    for (PieceType promotionPiece : promotionPieces) {
+                        // add a move from the starting position to here, including the promotion
+                        validMoves.add(new ChessMoveImpl(myPosition, forward, promotionPiece));
+                    }
+                } else {
+                    // add a move from the starting position to here
+                    validMoves.add(new ChessMoveImpl(myPosition, forward));
+                    // if the pawn is in its starting position
+                    if (firstMove) {
+                        // find the position two spaces forward from the starting position
+                        ChessPositionImpl twoForward = new ChessPositionImpl(forward.getRow() + direction, forward.getColumn());
+                        // if this position is not occupied, add a move from the starting position to here
+                        if (!twoForward.occupied(board)) validMoves.add(new ChessMoveImpl(myPosition, twoForward));
+                    }
                 }
             }
         }
@@ -66,8 +83,17 @@ public class Pawn implements ChessPiece {
                 if (capturePosition.occupied(board)) {
                     // if the piece is an enemy piece,
                     if (board.getPiece(capturePosition).getTeamColor() != this.team) {
-                        // add the move to the set of valid moves
-                        validMoves.add(new ChessMoveImpl(myPosition, capturePosition));
+                        // if the move takes it to the promotion row,
+                        if (capturePosition.getRow() == promotionRow) {
+                            // for each possible promotion piece,
+                            for (PieceType promotionPiece : promotionPieces) {
+                                // add a move from the starting position to here, including the promotion
+                                validMoves.add(new ChessMoveImpl(myPosition, capturePosition, promotionPiece));
+                            }
+                        } else {
+                            // add the move to the set of valid moves
+                            validMoves.add(new ChessMoveImpl(myPosition, capturePosition));
+                        }
                     }
                 }
             }
