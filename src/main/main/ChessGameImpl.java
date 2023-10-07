@@ -41,15 +41,16 @@ public class ChessGameImpl implements ChessGame {
         // start by assuming the king is not in check
         boolean inCheck = false;
         // iterate over all the positions on the board
-        ChessPositionImpl position = new ChessPositionImpl(1,1);
         for (int i = 1; i <= board.getMaxRow(); i++) {
             for (int j = 1; j <= board.getMaxColumn(); j++) {
+                ChessPosition position = new ChessPositionImpl(i, j);
                 // if there is a piece of the opposite team at the current position,
                 if (board.getPiece(position) != null && board.getPiece(position).getTeamColor() != teamColor) {
                     // iterate through each move for that piece
                     for (ChessMove move : board.getPiece(position).pieceMoves(board, position)) {
                         // if one of those moves ends in capturing the king of the given color,
-                        if (board.getPiece(move.getEndPosition()).getClass() == King.class &&
+                        if (board.getPiece(move.getEndPosition()) != null &&
+                            board.getPiece(move.getEndPosition()).getClass() == King.class &&
                             board.getPiece(move.getEndPosition()).getTeamColor() == teamColor) {
                             // the king is in check
                             inCheck = true;
@@ -57,9 +58,7 @@ public class ChessGameImpl implements ChessGame {
                         }
                     }
                 }
-                position.incrementColumn();
             }
-            position.setToPosition(i + 1, 0);
         }
         return inCheck;
     }
