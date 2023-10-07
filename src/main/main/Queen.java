@@ -16,7 +16,7 @@ public class Queen implements ChessPiece {
 
     @Override
     public String toString() {
-        return (team == ChessGame.TeamColor.WHITE ? "q" : "Q");
+        return (team == ChessGame.TeamColor.WHITE ? "Q" : "q");
     }
 
     @Override
