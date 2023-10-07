@@ -1,9 +1,6 @@
 package main;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 public class ChessBoardImpl implements ChessBoard {
 
@@ -23,6 +20,13 @@ public class ChessBoardImpl implements ChessBoard {
     @Override
     public ChessPiece getPiece(ChessPosition position) {
         return board[8 - position.getRow()][position.getColumn() - 1];
+    }
+
+    @Override
+    public void movePiece(ChessMove move) {
+        board[8 - move.getEndPosition().getRow()][move.getEndPosition().getColumn() - 1] =
+                board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1];
+        board[8 - move.getStartPosition().getRow()][move.getStartPosition().getColumn() - 1] = null;
     }
 
     public int getMaxRow() {

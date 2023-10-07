@@ -25,6 +25,8 @@ public interface ChessBoard {
      */
     ChessPiece getPiece(ChessPosition position);
 
+    void movePiece(ChessMove move);
+
     /**
      * Gets the maximum row number of the board
      */
