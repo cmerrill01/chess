@@ -89,15 +89,15 @@ public class ChessBoardImpl implements ChessBoard {
     public String toString() {
         StringBuilder output = new StringBuilder();
         // for each row of the chess board
-        for (int row = 0; row < board.length; row++) {
+        for (ChessPiece[] rowPieces : board) {
             // for each column in the row
-            for (int col = 0; col < board[row].length; col++) {
+            for (ChessPiece chessPiece : rowPieces) {
                 // print "|"
                 output.append("|");
                 // if there is a piece in this position
-                if (board[row][col] != null) {
+                if (chessPiece != null) {
                     // print the string representation of the piece
-                    output.append(board[row][col]);
+                    output.append(chessPiece);
                 } else {
                     // print " "
                     output.append(" ");

@@ -43,11 +43,6 @@ public class ChessPositionImpl implements ChessPosition {
         this.col = other.getColumn();
     }
 
-    public void setToPosition(int row, int column) {
-        this.row = row;
-        this.col = column;
-    }
-
     @Override
     public boolean onBoard(ChessBoard board) {
         return (row > 0 && row <= board.getMaxRow() && col > 0 && col <= board.getMaxColumn());

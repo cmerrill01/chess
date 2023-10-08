@@ -31,8 +31,7 @@ public class ChessGameImpl implements ChessGame {
             Collection<ChessMove> validMoves = new HashSet<>();
             TeamColor myTeam = board.getPiece(startPosition).getTeamColor();
             for (ChessMove possibleMove : possibleMoves) {
-                // TODO: Perform checks here
-                // store the piece this move would capture so we can put it back
+                // store the piece this move would capture, so we can put it back
                 ChessPiece capturedPiece = null;
                 if (board.getPiece(possibleMove.getEndPosition()) != null) {
                     capturedPiece = board.getPiece(possibleMove.getEndPosition());
