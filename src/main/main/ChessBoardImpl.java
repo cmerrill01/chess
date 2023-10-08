@@ -18,6 +18,11 @@ public class ChessBoardImpl implements ChessBoard {
     }
 
     @Override
+    public void removePiece(ChessPosition position) {
+        board[8 - position.getRow()][position.getColumn() - 1] = null;
+    }
+
+    @Override
     public ChessPiece getPiece(ChessPosition position) {
         return board[8 - position.getRow()][position.getColumn() - 1];
     }

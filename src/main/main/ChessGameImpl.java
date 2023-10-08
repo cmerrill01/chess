@@ -3,6 +3,7 @@ package main;
 import chess.*;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 public class ChessGameImpl implements ChessGame {
 
@@ -26,7 +27,36 @@ public class ChessGameImpl implements ChessGame {
     @Override
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         if (board.getPiece(startPosition) != null) {
-            return board.getPiece(startPosition).pieceMoves(board, startPosition);
+            Collection<ChessMove> possibleMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+            Collection<ChessMove> validMoves = new HashSet<>();
+            TeamColor myTeam = board.getPiece(startPosition).getTeamColor();
+            for (ChessMove possibleMove : possibleMoves) {
+                // TODO: Perform checks here
+                // store the piece this move would capture so we can put it back
+                ChessPiece capturedPiece = null;
+                if (board.getPiece(possibleMove.getEndPosition()) != null) {
+                    capturedPiece = board.getPiece(possibleMove.getEndPosition());
+                }
+                // make the move, so we can check whether it's legal
+                board.movePiece(possibleMove);
+                // if the move does not put this team in check,
+                if (!isInCheck(myTeam)) {
+                    // add it to the set of valid moves
+                    validMoves.add(possibleMove);
+                }
+                // reverse the move
+                if (possibleMove.getPromotionPiece() == null) {
+                    ChessMove reverseMove = new ChessMoveImpl(possibleMove.getEndPosition(), possibleMove.getStartPosition());
+                    board.movePiece(reverseMove);
+                } else {
+                    board.removePiece(possibleMove.getEndPosition());
+                    board.addPiece(possibleMove.getStartPosition(), new Pawn(myTeam));
+                }
+                if (capturedPiece != null) {
+                    board.addPiece(possibleMove.getEndPosition(), capturedPiece);
+                }
+            }
+            return validMoves;
         }
         else return null;
     }
@@ -37,29 +67,15 @@ public class ChessGameImpl implements ChessGame {
         if (board.getPiece(move.getStartPosition()).getTeamColor() != teamTurn) {
             // throw an invalid move exception
             throw new InvalidMoveException("INVALID MOVE: The selected piece belongs to the other team.");
-
         }
         // if the move is not in the set of valid moves starting at the given position,
         if (!validMoves(move.getStartPosition()).contains(move)) {
             // throw an invalid move exception
             throw new InvalidMoveException("INVALID MOVE: The selected piece cannot make this move.");
         }
-        ChessPiece capturedPiece = null;
-        if (board.getPiece(move.getEndPosition()) != null) {
-            capturedPiece = board.getPiece(move.getEndPosition());
-        }
+
         board.movePiece(move);
-        // if the move puts this team in check,
-        if (isInCheck(teamTurn)) {
-            // reverse the move
-            ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(), move.getStartPosition());
-            board.movePiece(reverseMove);
-            if (capturedPiece != null) {
-                board.addPiece(move.getEndPosition(), capturedPiece);
-            }
-            // throw an invalid move exception
-            throw new InvalidMoveException("INVALID MOVE: This move puts the current team's king in check.");
-        }
+
         // switch to the other team's turn
         switch (teamTurn) {
             case WHITE -> teamTurn = TeamColor.BLACK;
@@ -122,9 +138,14 @@ public class ChessGameImpl implements ChessGame {
                                 // this team is not in checkmate
                                 inCheckmate = false;
                                 // reverse the move
-                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
-                                        move.getStartPosition());
-                                board.movePiece(reverseMove);
+                                if (move.getPromotionPiece() == null) {
+                                    ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                            move.getStartPosition());
+                                    board.movePiece(reverseMove);
+                                } else {
+                                    board.removePiece(move.getEndPosition());
+                                    board.addPiece(move.getStartPosition(), new Pawn(teamColor));
+                                }
                                 if (capturedPiece != null) {
                                     board.addPiece(move.getEndPosition(), capturedPiece);
                                 }
@@ -132,9 +153,14 @@ public class ChessGameImpl implements ChessGame {
                                 break;
                             } else {
                                 // reverse the move
-                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
-                                        move.getStartPosition());
-                                board.movePiece(reverseMove);
+                                if (move.getPromotionPiece() == null) {
+                                    ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                            move.getStartPosition());
+                                    board.movePiece(reverseMove);
+                                } else {
+                                    board.removePiece(move.getEndPosition());
+                                    board.addPiece(move.getStartPosition(), new Pawn(teamColor));
+                                }
                                 if (capturedPiece != null) {
                                     board.addPiece(move.getEndPosition(), capturedPiece);
                                 }
@@ -175,9 +201,14 @@ public class ChessGameImpl implements ChessGame {
                                 // this team is not in stalemate
                                 inStalemate = false;
                                 // reverse the move
-                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
-                                        move.getStartPosition());
-                                board.movePiece(reverseMove);
+                                if (move.getPromotionPiece() == null) {
+                                    ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                            move.getStartPosition());
+                                    board.movePiece(reverseMove);
+                                } else {
+                                    board.removePiece(move.getEndPosition());
+                                    board.addPiece(move.getStartPosition(), new Pawn(teamColor));
+                                }
                                 if (capturedPiece != null) {
                                     board.addPiece(move.getEndPosition(), capturedPiece);
                                 }
@@ -185,9 +216,14 @@ public class ChessGameImpl implements ChessGame {
                                 break;
                             } else {
                                 // reverse the move
-                                ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
-                                        move.getStartPosition());
-                                board.movePiece(reverseMove);
+                                if (move.getPromotionPiece() == null) {
+                                    ChessMove reverseMove = new ChessMoveImpl(move.getEndPosition(),
+                                            move.getStartPosition());
+                                    board.movePiece(reverseMove);
+                                } else {
+                                    board.removePiece(move.getEndPosition());
+                                    board.addPiece(move.getStartPosition(), new Pawn(teamColor));
+                                }
                                 if (capturedPiece != null) {
                                     board.addPiece(move.getEndPosition(), capturedPiece);
                                 }

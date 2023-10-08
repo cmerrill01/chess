@@ -16,6 +16,8 @@ public interface ChessBoard {
      */
     void addPiece(ChessPosition position, ChessPiece piece);
 
+    void removePiece(ChessPosition position);
+
     /**
      * Gets a chess piece on the chessboard
      * 
