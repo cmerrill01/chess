@@ -2,10 +2,22 @@ package models;
 
 public class AuthToken {
 
+    /**
+     * the username of the user to whom the authentication token belongs
+     */
     private String username;
+    /**
+     * a unique code representing the user's authentication for the current session
+     */
     private String authToken;
 
-    public AuthToken() {
+    /**
+     * Create a new authentication token that the user can use during the session to make requests that require
+     * authentication
+     * @param username the username of the user to whom the authentication token belongs
+     * @param authToken a unique code representing the user's authentication for the current session
+     */
+    public AuthToken(String username, String authToken) {
 
     }
 
@@ -13,16 +25,8 @@ public class AuthToken {
         return null;
     }
 
-    public void setUsername(String username) {
-
-    }
-
     public String getAuthToken() {
         return null;
-    }
-
-    public void setAuthToken(String authToken) {
-
     }
 
 }
