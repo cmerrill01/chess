@@ -7,36 +7,80 @@ import java.util.Set;
 
 public class GameDAO {
 
+    /**
+     * the set of all games in the database
+     */
     private Set<Game> games;
 
+    /**
+     * Create a new DAO to access the games in the database
+     */
     public GameDAO() {
 
     }
 
+    /**
+     * insert a new game into the database
+     * @param gameToInsert the game to be added to the database
+     * @throws DataAccessException if the game is not successfully added
+     */
     public void insertGame(Game gameToInsert) throws DataAccessException {
 
     }
 
+    /**
+     * find a game that already exists in the database, based on its id#
+     * @param gameIdToFind the id # of the game to be found
+     * @return the game, if found; otherwise, null
+     * @throws DataAccessException there is a problem accessing the data
+     */
     public Game findGame(int gameIdToFind) throws DataAccessException {
         return null;
     }
 
+    /**
+     * access all the games in the database
+     * @return the set of all the games in the database
+     * @throws DataAccessException if the data could not be successfully accessed
+     */
     public Set<Game> findAllGames() throws DataAccessException {
         return null;
     }
 
+    /**
+     * set one of the players in one of the games in the database to a given user
+     * @param username the username of the user who is joining the game
+     * @param gameId the game the user is joining
+     * @param teamColor the team the user will be playing as in the game
+     * @throws DataAccessException if the user is not successfully assigned as the desired player in the game
+     */
     public void claimSpotInGame(String username, int gameId, ChessGame.TeamColor teamColor) throws DataAccessException {
 
     }
 
-    public void updateGame(int gameIdToUpdate, Game gameUpdated) throws DataAccessException {
+    /**
+     * update the data for a game in the database
+     * @param gameIdToUpdate the unique id # of the game to be updated
+     * @param gameUpdated the new data to be assigned to the game
+     * @throws DataAccessException if the game is not successfully updated
+     */
+    public void updateGame(int gameIdToUpdate, ChessGame gameUpdated) throws DataAccessException {
 
     }
 
+    /**
+     * remove a game from the database
+     * @param gameIdToRemove the unique id # of the game to be removed
+     * @throws DataAccessException if the game is not successfully removed
+     */
     public void removeGame(int gameIdToRemove) throws DataAccessException {
 
     }
 
+    /**
+     * remove all the games from the database
+     * @throws DataAccessException if all games are not successfully removed from the database
+     */
     public void clearGames() throws DataAccessException {
 
     }
