@@ -2,33 +2,37 @@ package requests;
 
 public class RegisterRequest {
 
+    /**
+     * the new user's username, which will be used to create a new User in the database
+     */
     private String username;
+    /**
+     * the new user's password, which will be used to create a new User in the database
+     */
     private String password;
+    /**
+     * the new user's email address, which will be used to create a new User in the database
+     */
     private String email;
 
-    public RegisterRequest() {
+    /**
+     * Create a new request to add a user to the database.
+     * Provide the user's username, password, and email address
+     */
+    public RegisterRequest(String username, String password, String email) {
 
     }
 
-    public void setUsername(String username) {
-
-    }
 
     public String getUsername() {
         return null;
     }
 
-    public void setPassword(String password) {
-
-    }
 
     public String getPassword() {
         return null;
     }
 
-    public void setEmail(String email) {
-
-    }
 
     public String getEmail() {
         return null;

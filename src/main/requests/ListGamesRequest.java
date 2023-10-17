@@ -4,9 +4,16 @@ import models.AuthToken;
 
 public class ListGamesRequest {
 
+    /**
+     * the user's authentication token for the current session
+     */
     private AuthToken authToken;
 
-    public ListGamesRequest() {
+    /**
+     * create a request to list a representation of all the games in the database
+     * @param authToken the user's authentication token for the current session
+     */
+    public ListGamesRequest(AuthToken authToken) {
 
     }
 
@@ -14,7 +21,4 @@ public class ListGamesRequest {
         return null;
     }
 
-    public void setAuthToken(AuthToken authToken) {
-
-    }
 }
