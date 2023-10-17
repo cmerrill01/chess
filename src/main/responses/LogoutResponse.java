@@ -1,10 +1,10 @@
 package responses;
 
-public class LogoutResult {
+public class LogoutResponse {
 
     private String message;
 
-    public LogoutResult() {
+    public LogoutResponse() {
 
     }
 
