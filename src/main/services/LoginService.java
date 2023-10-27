@@ -2,6 +2,7 @@ package services;
 
 import daos.AuthDAO;
 import daos.UserDAO;
+import daos.memoryDatabase;
 import dataAccess.DataAccessException;
 import models.AuthToken;
 import models.User;
@@ -19,17 +20,19 @@ public class LoginService {
      * @return a response indicating whether login was successful and providing the user with an authentication
      * token
      */
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, memoryDatabase db) {
 
         LoginResponse response;
         User user;
 
-        UserDAO userDAO = new UserDAO();
-        AuthDAO authDAO = new AuthDAO();
+        UserDAO userDAO = new UserDAO(db.getUserTable());
+        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
 
         try {
             user = userDAO.findUser(request.getUsername());
-            if (Objects.equals(user.getPassword(), request.getPassword())) {
+            if (user == null) {
+                response = new LoginResponse("Error: username does not exist");
+            } else if (Objects.equals(user.getPassword(), request.getPassword())) {
                 String authToken = UUID.randomUUID().toString();
                 authDAO.insertAuthToken(new AuthToken(user.getUsername(), authToken));
                 response = new LoginResponse(user.getUsername(), authToken);
@@ -37,7 +40,7 @@ public class LoginService {
                 response = new LoginResponse("Error: unauthorized");
             }
         } catch (DataAccessException e) {
-            response = new LoginResponse("Error: unauthorized");
+            response = new LoginResponse(e.getMessage());
         }
 
         return response;

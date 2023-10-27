@@ -18,15 +18,16 @@ public class LoginRequest {
      * @param password the password provided to attempt to log in
      */
     public LoginRequest(String username, String password) {
-
+        this.username = username;
+        this.password = password;
     }
 
     public String getUsername() {
-        return null;
+        return username;
     }
 
     public String getPassword() {
-        return null;
+        return password;
     }
 
 }

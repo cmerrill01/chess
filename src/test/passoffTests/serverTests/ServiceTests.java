@@ -83,11 +83,11 @@ public class ServiceTests {
 
         LoginRequest request = new LoginRequest("test_username", "test_password");
         LoginService service = new LoginService();
-        LoginResponse response = service.login(request);
+        LoginResponse response = service.login(request, db);
 
         Assertions.assertNotNull(db.getAuthTokenTable().get(testUser.getUsername()), "AuthToken not found in database for logged-in user");
-        Assertions.assertEquals(response.getUsername(), testUser.getUsername(), "Response does not include the user's username");
-        Assertions.assertEquals(response.getAuthToken(), db.getAuthTokenTable().get(testUser.getUsername()).getAuthToken(), "Response does not include the correct token");
+        Assertions.assertEquals(testUser.getUsername(), response.getUsername(), "Response does not include the user's username");
+        Assertions.assertEquals(db.getAuthTokenTable().get(testUser.getUsername()).getAuthToken(), response.getAuthToken(), "Response does not include the correct token");
         Assertions.assertNull(response.getMessage(), "Response should not include a message");
     }
 
@@ -97,12 +97,12 @@ public class ServiceTests {
 
         LoginRequest request = new LoginRequest("incorrect_username", "test_password");
         LoginService service = new LoginService();
-        LoginResponse response = service.login(request);
+        LoginResponse response = service.login(request, db);
 
         Assertions.assertNull(db.getAuthTokenTable().get(request.getUsername()), "Non-existent user should not have been given a token");
         Assertions.assertNull(response.getUsername(), "Response should not include a username");
         Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
-        Assertions.assertEquals(response.getMessage(), "Error: username does not exist", "Response message incorrect");
+        Assertions.assertEquals("Error: username does not exist", response.getMessage(), "Response message incorrect");
     }
 
     @Test
@@ -111,12 +111,12 @@ public class ServiceTests {
 
         LoginRequest request = new LoginRequest("test_username", "incorrect_password");
         LoginService service = new LoginService();
-        LoginResponse response = service.login(request);
+        LoginResponse response = service.login(request, db);
 
         Assertions.assertNull(db.getAuthTokenTable().get(request.getUsername()), "User should not have been given an AuthToken");
         Assertions.assertNull(response.getUsername(), "Response should not include a username");
         Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
-        Assertions.assertEquals(response.getMessage(), "Error: unauthorized", "Response message incorrect");
+        Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 
     @Test
@@ -126,13 +126,13 @@ public class ServiceTests {
 
         LoginRequest request = new LoginRequest("test_username", "test_password");
         LoginService service = new LoginService();
-        LoginResponse response = service.login(request);
+        LoginResponse response = service.login(request, db);
 
-        Assertions.assertEquals(db.getAuthTokenTable().get(testToken.getUsername()).getAuthToken(), testToken.getAuthToken(), "Token should not have been replaced");
-        Assertions.assertEquals(db.getAuthTokenTable().size(), 1, "A new token should not have been created");
+        Assertions.assertEquals(testToken.getAuthToken(), db.getAuthTokenTable().get(testToken.getUsername()).getAuthToken(), "Token should not have been replaced");
+        Assertions.assertEquals(1, db.getAuthTokenTable().size(), "A new token should not have been created");
         Assertions.assertNull(response.getUsername(), "Response should not include a username");
         Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
-        Assertions.assertEquals(response.getMessage(), "Error: already logged in", "Response message incorrect");
+        Assertions.assertEquals("Error: already logged in", response.getMessage(), "Response message incorrect");
     }
 
 }
