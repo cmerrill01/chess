@@ -34,7 +34,8 @@ public class UserDAO {
      * @throws DataAccessException if the user is not successfully inserted into the database
      */
     public void insertUser(User userToInsert) throws DataAccessException {
-
+        // TODO: Throw an exception if the user is already in the database
+        users.put(userToInsert.getUsername(), userToInsert);
     }
 
     /**
