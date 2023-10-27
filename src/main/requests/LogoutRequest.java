@@ -7,18 +7,18 @@ public class LogoutRequest {
     /**
      * the user's authentication token for the current session
      */
-    private AuthToken authToken;
+    private String authToken;
 
     /**
      * Create a new request to log out of the current session
      * @param authToken the user's authentication token for the current session
      */
-    public LogoutRequest(AuthToken authToken) {
-
+    public LogoutRequest(String authToken) {
+        this.authToken = authToken;
     }
 
-    public AuthToken getAuthToken() {
-        return null;
+    public String getAuthToken() {
+        return authToken;
     }
 
 }

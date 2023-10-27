@@ -19,11 +19,11 @@ public class LogoutResponse {
      * @param message a message indicating why the attempt to logout was unsuccessful
      */
     public LogoutResponse(String message) {
-
+        this.message = message;
     }
 
     public String getMessage() {
-        return null;
+        return message;
     }
 
 }

@@ -3,15 +3,10 @@ package passoffTests.serverTests;
 import daos.memoryDatabase;
 import models.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
 import requests.LoginRequest;
-import requests.RegisterRequest;
-import responses.ClearApplicationResponse;
-import responses.LoginResponse;
-import responses.RegisterResponse;
-import services.ClearApplicationService;
-import services.LoginService;
-import services.RegisterService;
+import requests.*;
+import responses.*;
+import services.*;
 
 
 public class ServiceTests {
@@ -134,5 +129,33 @@ public class ServiceTests {
         Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
         Assertions.assertEquals("Error: already logged in", response.getMessage(), "Response message incorrect");
     }
+
+    @Test
+    public void logoutSuccess() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getUsername(), testToken);
+
+        LogoutRequest request = new LogoutRequest("test_token");
+        LogoutService service = new LogoutService();
+        LogoutResponse response = service.logout(request, db);
+
+        Assertions.assertNull(db.getAuthTokenTable().get(testToken.getUsername()), "The token should have been removed from the database");
+        Assertions.assertNull(response.getMessage(), "The response should not include a message");
+    }
+
+    @Test
+    public void logoutFail() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getUsername(), testToken);
+
+        LogoutRequest request = new LogoutRequest("incorrect_token");
+        LogoutService service = new LogoutService();
+        LogoutResponse response = service.logout(request, db);
+
+        Assertions.assertNotNull(db.getAuthTokenTable().get(testToken.getUsername()), "Token should not have been removed");
+        Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
+    }
+
+
 
 }

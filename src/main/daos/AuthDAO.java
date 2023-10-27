@@ -3,8 +3,7 @@ package daos;
 import dataAccess.DataAccessException;
 import models.AuthToken;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class AuthDAO {
 
@@ -50,11 +49,19 @@ public class AuthDAO {
 
     /**
      * remove a user's authentication token from the database
-     * @param username the username of the user whose authentication token is to be removed
+     * @param authToken the authentication token of the user whose authentication token is to be removed
      * @throws DataAccessException if the removal was unsuccessful
      */
-    public void removeAuthToken(String username) throws DataAccessException {
-
+    public void removeAuthToken(String authToken) throws DataAccessException {
+        boolean removedToken = false;
+        for (String username : authTokens.keySet()) {
+            if (Objects.equals(authTokens.get(username).getAuthToken(), authToken)) {
+                authTokens.remove(username);
+                removedToken = true;
+                break;
+            }
+        }
+        if (!removedToken) throw new DataAccessException("Error: unauthorized");
     }
 
     /**
