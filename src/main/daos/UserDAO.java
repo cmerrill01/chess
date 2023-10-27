@@ -70,7 +70,7 @@ public class UserDAO {
      * @throws DataAccessException if the users are not successfully removed from the database
      */
     public void clearUsers() throws DataAccessException {
-
+        users.clear();
     }
 
 }

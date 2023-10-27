@@ -1,6 +1,7 @@
 package models;
 
 import chess.ChessGame;
+import main.ChessGameImpl;
 
 public class Game {
 
@@ -31,11 +32,13 @@ public class Game {
      * @param gameID a nickname for the game, assigned to the game by the user upon creation
      */
     public Game(String gameName, int gameID) {
-
+        this.gameID = gameID;
+        this.gameName = gameName;
+        game = new ChessGameImpl();
     }
 
     public int getGameID() {
-        return 0;
+        return gameID;
     }
 
     public String getWhiteUsername() {

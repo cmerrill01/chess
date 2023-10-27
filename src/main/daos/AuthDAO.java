@@ -61,7 +61,7 @@ public class AuthDAO {
      * @throws DataAccessException if the database was not successfully cleared
      */
     public void clearAuthTokens() throws DataAccessException {
-
+        authTokens.clear();
     }
 
 }

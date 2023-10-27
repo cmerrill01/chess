@@ -18,11 +18,12 @@ public class AuthToken {
      * @param authToken a unique code representing the user's authentication for the current session
      */
     public AuthToken(String username, String authToken) {
-
+        this.username = username;
+        this.authToken = authToken;
     }
 
     public String getUsername() {
-        return null;
+        return username;
     }
 
     public String getAuthToken() {

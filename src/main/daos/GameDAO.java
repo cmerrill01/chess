@@ -92,7 +92,7 @@ public class GameDAO {
      * @throws DataAccessException if all games are not successfully removed from the database
      */
     public void clearGames() throws DataAccessException {
-
+        games.clear();
     }
 
 }

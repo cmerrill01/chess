@@ -23,11 +23,13 @@ public class User {
      * @param email the user's email, which is not used for anything
      */
     public User(String username, String password, String email) {
-
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
     public String getUsername() {
-        return null;
+        return username;
     }
 
     public String getPassword() {
