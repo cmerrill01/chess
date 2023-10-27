@@ -27,7 +27,7 @@ public class AuthToken {
     }
 
     public String getAuthToken() {
-        return null;
+        return authToken;
     }
 
 }

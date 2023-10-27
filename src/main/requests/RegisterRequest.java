@@ -20,22 +20,24 @@ public class RegisterRequest {
      * Provide the user's username, password, and email address
      */
     public RegisterRequest(String username, String password, String email) {
-
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
 
     public String getUsername() {
-        return null;
+        return username;
     }
 
 
     public String getPassword() {
-        return null;
+        return password;
     }
 
 
     public String getEmail() {
-        return null;
+        return email;
     }
 
 }

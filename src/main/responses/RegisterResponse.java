@@ -22,7 +22,8 @@ public class RegisterResponse {
      *                  login session
      */
     public RegisterResponse(String username, String authToken) {
-
+        this.username = username;
+        this.authToken = authToken;
     }
 
     /**
@@ -30,19 +31,19 @@ public class RegisterResponse {
      * @param message a message indicating the reason why account creation was unsuccessful
      */
     public RegisterResponse(String message) {
-
+        this.message = message;
     }
 
     public String getUsername() {
-        return null;
+        return username;
     }
 
     public String getMessage() {
-        return null;
+        return message;
     }
 
     public String getAuthToken() {
-        return null;
+        return authToken;
     }
 
 }

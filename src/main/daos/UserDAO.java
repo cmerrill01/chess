@@ -3,6 +3,7 @@ package daos;
 import dataAccess.DataAccessException;
 import models.User;
 
+import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,7 +35,7 @@ public class UserDAO {
      * @throws DataAccessException if the user is not successfully inserted into the database
      */
     public void insertUser(User userToInsert) throws DataAccessException {
-        // TODO: Throw an exception if the user is already in the database
+        if (users.containsKey(userToInsert.getUsername())) throw new DataAccessException("Error: already taken");
         users.put(userToInsert.getUsername(), userToInsert);
     }
 
