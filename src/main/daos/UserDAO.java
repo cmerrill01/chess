@@ -2,20 +2,30 @@ package daos;
 
 import dataAccess.DataAccessException;
 import models.User;
-import java.util.Set;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 public class UserDAO {
 
     /**
      * the set of all users in the database
      */
-    private Set<User> users;
+    private Map<String, User> users;
 
     /**
      * Create a new DAO for the users in the database
      */
     public UserDAO() {
 
+    }
+
+    /**
+     * Create a new DAO for users in a memory-based database
+     * @param memoryUserTable a pointer to the table of users in the memory-based database
+     */
+    public UserDAO(Map<String, User> memoryUserTable) {
+        users = memoryUserTable;
     }
 
     /**
@@ -34,7 +44,7 @@ public class UserDAO {
      * @throws DataAccessException if there was a problem accessing the data
      */
     public User findUser(String username) throws DataAccessException {
-        return null;
+        return users.get(username);
     }
 
     /**
@@ -52,6 +62,14 @@ public class UserDAO {
      * @throws DataAccessException if the user is not successfully removed from the database
      */
     public void removeUser(String username) throws DataAccessException {
+
+    }
+
+    /**
+     * clear all users from the database
+     * @throws DataAccessException if the users are not successfully removed from the database
+     */
+    public void clearUsers() throws DataAccessException {
 
     }
 

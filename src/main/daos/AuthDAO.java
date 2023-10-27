@@ -2,14 +2,16 @@ package daos;
 
 import dataAccess.DataAccessException;
 import models.AuthToken;
-import java.util.Set;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 public class AuthDAO {
 
     /**
      * the set of all authentication tokens for currently logged-in users
      */
-    private Set<AuthToken> authTokens;
+    private Map<String, AuthToken> authTokens;
 
     /**
      * Create a new DAO to access the set of authentication tokens
@@ -19,12 +21,20 @@ public class AuthDAO {
     }
 
     /**
+     * Create a new DAO to access the set of authentication tokens
+     * @param memoryAuthTokenTable a pointer to the memory-based table of authentication tokens to be accessed
+     */
+    public AuthDAO(Map<String, AuthToken> memoryAuthTokenTable) {
+        authTokens = memoryAuthTokenTable;
+    }
+
+    /**
      * insert an authentication token into the database
      * @param tokenToInsert the token to be added to the database
      * @throws DataAccessException if the user already has an authentication token in the database
      */
     public void insertAuthToken(AuthToken tokenToInsert) throws DataAccessException {
-
+        authTokens.put(tokenToInsert.getUsername(),tokenToInsert);
     }
 
     /**

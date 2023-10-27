@@ -3,6 +3,8 @@ package daos;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
 import models.Game;
+
+import java.util.Map;
 import java.util.Set;
 
 public class GameDAO {
@@ -10,13 +12,21 @@ public class GameDAO {
     /**
      * the set of all games in the database
      */
-    private Set<Game> games;
+    private Map<Integer, Game> games;
 
     /**
      * Create a new DAO to access the games in the database
      */
     public GameDAO() {
 
+    }
+
+    /**
+     * Create a new DAO to access the games from a memory-based database
+     * @param memoryGameTable a pointer to the memory-based table of games
+     */
+    public GameDAO(Map<Integer, Game> memoryGameTable) {
+        games = memoryGameTable;
     }
 
     /**
