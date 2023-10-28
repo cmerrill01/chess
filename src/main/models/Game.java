@@ -3,7 +3,10 @@ package models;
 import chess.ChessGame;
 import main.ChessGameImpl;
 
-public class Game {
+import java.util.Comparator;
+import java.util.Objects;
+
+public class Game implements Comparable {
 
     /**
      * a unique identifier #, assigned to the game by the system upon creation
@@ -42,23 +45,46 @@ public class Game {
     }
 
     public String getWhiteUsername() {
-        return null;
+        return whiteUsername;
     }
 
     public void setWhiteUsername(String whiteUsername) {
-
+        this.whiteUsername = whiteUsername;
     }
 
     public String getBlackUsername() {
-        return null;
+        return blackUsername;
     }
 
     public void setBlackUsername(String blackUsername) {
-
+        this.blackUsername = blackUsername;
     }
 
     public String getGameName() {
-        return null;
+        return gameName;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Game game1 = (Game) o;
+        return gameID == game1.gameID && Objects.equals(whiteUsername, game1.whiteUsername) && Objects.equals(blackUsername, game1.blackUsername) && Objects.equals(gameName, game1.gameName) && Objects.equals(game, game1.game);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameID, whiteUsername, blackUsername, gameName, game);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        int compare;
+        if (o instanceof Game other) {
+            compare = this.gameID - other.gameID;
+        } else {
+            compare = this.hashCode() - o.hashCode();
+        }
+        return compare;
+    }
 }

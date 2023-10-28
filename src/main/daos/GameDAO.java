@@ -6,6 +6,7 @@ import models.Game;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class GameDAO {
 
@@ -35,7 +36,7 @@ public class GameDAO {
      * @throws DataAccessException if the game is not successfully added
      */
     public void insertGame(Game gameToInsert) throws DataAccessException {
-
+        games.put(gameToInsert.getGameID(), gameToInsert);
     }
 
     /**
@@ -45,7 +46,7 @@ public class GameDAO {
      * @throws DataAccessException there is a problem accessing the data
      */
     public Game findGame(int gameIdToFind) throws DataAccessException {
-        return null;
+        return games.get(gameIdToFind);
     }
 
     /**
@@ -54,7 +55,7 @@ public class GameDAO {
      * @throws DataAccessException if the data could not be successfully accessed
      */
     public Set<Game> findAllGames() throws DataAccessException {
-        return null;
+        return new TreeSet<>(games.values());
     }
 
     /**

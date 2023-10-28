@@ -21,8 +21,12 @@ public class LogoutService {
         AuthDAO dao = new AuthDAO(db.getAuthTokenTable());
 
         try {
-            dao.removeAuthToken(request.getAuthToken());
-            response = new LogoutResponse();
+            if (dao.findAuthToken(request.getAuthToken()) != null) {
+                dao.removeAuthToken(request.getAuthToken());
+                response = new LogoutResponse();
+            } else {
+                response = new LogoutResponse("Error: unauthorized");
+            }
         } catch (DataAccessException e) {
             response = new LogoutResponse(e.getMessage());
         }

@@ -1,48 +1,17 @@
 package responses;
 
-import chess.ChessGame;
 import models.Game;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class ListGamesResponse {
 
     /**
-     * a class internal to this type of request. The purpose of this class is to represent key information
-     * about a game without needing to represent the game itself
-     */
-    private class gameRepresentation {
-        /**
-         * the id # of the game being represented
-         */
-        private int gameID;
-        /**
-         * the username of the user playing as white in this game (may be blank)
-         */
-        private String whiteUsername;
-        /**
-         * the username of the user playing as black in this game (may be blank)
-         */
-        private String blackUsername;
-        /**
-         * the name of the game being represented
-         */
-        private String gameName;
-
-        /**
-         * given a game from the database, create a simplified representation that can be listed
-         * @param game the game to be represented
-         */
-        public gameRepresentation(Game game) {
-
-        }
-    }
-
-    /**
      * a list of simplified representations of all the games in the database
      */
-    private List<gameRepresentation> games;
+    private Set<Game> games;
     /**
      * a message indicating why the request to list all the games was unsuccessful
      */
@@ -53,7 +22,8 @@ public class ListGamesResponse {
      * @param games all the games in the database
      */
     public ListGamesResponse(Set<Game> games) {
-
+        this.games = new TreeSet<>();
+        this.games.addAll(games);
     }
 
     /**
@@ -61,14 +31,14 @@ public class ListGamesResponse {
      * @param message a message indicating why the request to list all the games was unsuccessful
      */
     public ListGamesResponse(String message) {
-
+        this.message = message;
     }
 
     public String getMessage() {
-        return null;
+        return message;
     }
 
-    public List<gameRepresentation> getGamesList() {
-        return null;
+    public Set<Game> getGamesList() {
+        return games;
     }
 }

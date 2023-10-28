@@ -7,18 +7,18 @@ public class ListGamesRequest {
     /**
      * the user's authentication token for the current session
      */
-    private AuthToken authToken;
+    private String authToken;
 
     /**
      * create a request to list a representation of all the games in the database
      * @param authToken the user's authentication token for the current session
      */
-    public ListGamesRequest(AuthToken authToken) {
-
+    public ListGamesRequest(String authToken) {
+        this.authToken = authToken;
     }
 
-    public AuthToken getAuthToken() {
-        return null;
+    public String getAuthToken() {
+        return authToken;
     }
 
 }

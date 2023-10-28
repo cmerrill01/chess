@@ -1,5 +1,10 @@
 package services;
 
+import daos.AuthDAO;
+import daos.GameDAO;
+import daos.memoryDatabase;
+import dataAccess.DataAccessException;
+import models.AuthToken;
 import requests.ListGamesRequest;
 import responses.ListGamesResponse;
 
@@ -11,8 +16,22 @@ public class ListGamesService {
      * @return a response indicating whether the request was successful and, if so, providing the requested
      * list of games
      */
-    public ListGamesResponse listGames(ListGamesRequest request) {
-        return null;
+    public ListGamesResponse listGames(ListGamesRequest request, memoryDatabase db) {
+        ListGamesResponse response;
+        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
+        GameDAO gameDAO = new GameDAO(db.getGameTable());
+
+        try {
+            if (authDAO.findAuthToken(request.getAuthToken()) != null) {
+                response = new ListGamesResponse(gameDAO.findAllGames());
+            } else {
+                response = new ListGamesResponse("Error: unauthorized");
+            }
+        } catch (DataAccessException e) {
+            response = new ListGamesResponse(e.getMessage());
+        }
+
+        return response;
     }
 
 }

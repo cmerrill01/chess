@@ -33,18 +33,18 @@ public class AuthDAO {
      * @throws DataAccessException if the user already has an authentication token in the database
      */
     public void insertAuthToken(AuthToken tokenToInsert) throws DataAccessException {
-        if (authTokens.containsKey(tokenToInsert.getUsername())) throw new DataAccessException("Error: already logged in");
-        authTokens.put(tokenToInsert.getUsername(), tokenToInsert);
+        if (authTokens.containsKey(tokenToInsert.getAuthToken())) throw new DataAccessException("Error: already logged in");
+        authTokens.put(tokenToInsert.getAuthToken(), tokenToInsert);
     }
 
     /**
      * find whether an authentication token belonging to a given user is in the database
-     * @param username the username of the user whose authentication token we are looking for
+     * @param authToken the username of the user whose authentication token we are looking for
      * @return the authentication token of the given user, if found; otherwise, null
      * @throws DataAccessException if there is a problem with accessing the data
      */
-    public AuthToken findAuthToken(String username) throws DataAccessException {
-        return authTokens.get(username);
+    public AuthToken findAuthToken(String authToken) throws DataAccessException {
+        return authTokens.get(authToken);
     }
 
     /**
@@ -53,15 +53,7 @@ public class AuthDAO {
      * @throws DataAccessException if the removal was unsuccessful
      */
     public void removeAuthToken(String authToken) throws DataAccessException {
-        boolean removedToken = false;
-        for (String username : authTokens.keySet()) {
-            if (Objects.equals(authTokens.get(username).getAuthToken(), authToken)) {
-                authTokens.remove(username);
-                removedToken = true;
-                break;
-            }
-        }
-        if (!removedToken) throw new DataAccessException("Error: unauthorized");
+        authTokens.remove(authToken);
     }
 
     /**
