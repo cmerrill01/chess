@@ -31,7 +31,7 @@ public class LoginService {
         try {
             user = userDAO.findUser(request.getUsername());
             if (user == null) {
-                response = new LoginResponse("Error: username does not exist");
+                response = new LoginResponse("Error: unauthorized");
             } else if (Objects.equals(user.getPassword(), request.getPassword())) {
                 String authToken = UUID.randomUUID().toString();
                 authDAO.insertAuthToken(new AuthToken(user.getUsername(), authToken));

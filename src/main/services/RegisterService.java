@@ -20,6 +20,10 @@ public class RegisterService {
      */
     public RegisterResponse register(RegisterRequest request, memoryDatabase db) {
 
+        if (request.getUsername() == null || request.getPassword() == null || request.getEmail() == null) {
+            return new RegisterResponse("Error: bad request");
+        }
+
         RegisterResponse response;
 
         User user = new User(request.getUsername(), request.getPassword(), request.getEmail());
