@@ -1,7 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import daos.AuthDAO;
 import daos.memoryDatabase;
+import dataAccess.DataAccessException;
 import requests.*;
 import responses.*;
 import services.*;
@@ -74,6 +76,24 @@ public class Server {
         ListGamesResponse response = service.listGames(request, db);
         if (Objects.equals(response.getMessage(), "Error: unauthorized")) res.status(401);
         return new Gson().toJson(response, ListGamesResponse.class);
+    }
+
+    private Object createGame(Request req, Response res) {
+        System.out.println("Received headers: " + req.headers());
+        CreateGameResponse response;
+        try {
+            if (new AuthDAO(db.getAuthTokenTable()).findAuthToken(req.headers("Authorization")) == null) {
+                response = new CreateGameResponse("Error: unauthorized");
+                res.status(401);
+            } else {
+                CreateGameRequest request = new Gson().fromJson(req.body(), CreateGameRequest.class);
+                CreateGameService service = new CreateGameService();
+                response = service.createGame(request, db);
+            }
+        } catch (DataAccessException e) {
+            response = new CreateGameResponse(e.getMessage());
+        }
+        return new Gson().toJson(response, CreateGameResponse.class);
     }
 
 }
