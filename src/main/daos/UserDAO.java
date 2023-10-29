@@ -2,10 +2,7 @@ package daos;
 
 import dataAccess.DataAccessException;
 import models.User;
-
-import javax.xml.crypto.Data;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class UserDAO {
 
@@ -47,24 +44,6 @@ public class UserDAO {
      */
     public User findUser(String username) throws DataAccessException {
         return users.get(username);
-    }
-
-    /**
-     * change a user's password in the database
-     * @param username the username of the user whose password is to be changed
-     * @throws DataAccessException if the password is not successfully changed
-     */
-    public void changePassword(String username) throws DataAccessException {
-
-    }
-
-    /**
-     * remove a user from the database
-     * @param username the username of the user to be removed
-     * @throws DataAccessException if the user is not successfully removed from the database
-     */
-    public void removeUser(String username) throws DataAccessException {
-
     }
 
     /**

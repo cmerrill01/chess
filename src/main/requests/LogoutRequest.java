@@ -1,13 +1,11 @@
 package requests;
 
-import models.AuthToken;
-
 public class LogoutRequest {
 
     /**
      * the user's authentication token for the current session
      */
-    private String authToken;
+    private final String authToken;
 
     /**
      * Create a new request to log out of the current session

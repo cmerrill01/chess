@@ -4,7 +4,6 @@ import daos.AuthDAO;
 import daos.memoryDatabase;
 import dataAccess.DataAccessException;
 import requests.LogoutRequest;
-import responses.LoginResponse;
 import responses.LogoutResponse;
 
 public class LogoutService {

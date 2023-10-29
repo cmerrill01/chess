@@ -6,9 +6,9 @@ import java.util.TreeMap;
 
 public class memoryDatabase {
 
-    private Map<String, AuthToken> authTokenTable;
-    private Map<String, User> userTable;
-    private Map<Integer, Game> gameTable;
+    private final Map<String, AuthToken> authTokenTable;
+    private final Map<String, User> userTable;
+    private final Map<Integer, Game> gameTable;
 
     public memoryDatabase() {
         authTokenTable = new TreeMap<>();

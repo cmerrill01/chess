@@ -3,7 +3,6 @@ package models;
 import chess.ChessGame;
 import main.ChessGameImpl;
 
-import java.util.Comparator;
 import java.util.Objects;
 
 public class Game implements Comparable {
@@ -23,11 +22,11 @@ public class Game implements Comparable {
     /**
      * a nickname for the game, assigned to the game by the user upon creation
      */
-    private String gameName;
+    private final String gameName;
     /**
      * the data and functionality of the chess game
      */
-    private ChessGame game;
+    private final ChessGame game;
 
     /**
      * Create a new game (not yet added to the database)

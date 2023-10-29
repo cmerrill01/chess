@@ -5,12 +5,12 @@ public class LoginRequest {
     /**
      * the username provided to attempt to log in
      */
-    private String username;
+    private final String username;
 
     /**
      * the password provided to attempt to log in
      */
-    private String password;
+    private final String password;
 
     /**
      * Create a new request to log in to an existing user account

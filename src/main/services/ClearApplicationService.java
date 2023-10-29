@@ -2,7 +2,6 @@ package services;
 
 import daos.*;
 import dataAccess.DataAccessException;
-import models.User;
 import responses.ClearApplicationResponse;
 
 public class ClearApplicationService {

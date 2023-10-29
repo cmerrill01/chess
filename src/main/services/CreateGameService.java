@@ -1,6 +1,5 @@
 package services;
 
-import daos.AuthDAO;
 import daos.GameDAO;
 import daos.memoryDatabase;
 import dataAccess.DataAccessException;
@@ -23,7 +22,6 @@ public class CreateGameService {
 
         CreateGameResponse response;
 
-        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
         GameDAO gameDAO = new GameDAO(db.getGameTable());
 
         try {

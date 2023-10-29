@@ -33,8 +33,8 @@ public class AuthDAO {
      * @throws DataAccessException if the user already has an authentication token in the database
      */
     public void insertAuthToken(AuthToken tokenToInsert) throws DataAccessException {
-        if (authTokens.containsKey(tokenToInsert.getAuthToken())) throw new DataAccessException("Error: already logged in");
-        authTokens.put(tokenToInsert.getAuthToken(), tokenToInsert);
+        if (authTokens.containsKey(tokenToInsert.authToken())) throw new DataAccessException("Error: already logged in");
+        authTokens.put(tokenToInsert.authToken(), tokenToInsert);
     }
 
     /**

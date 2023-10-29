@@ -1,13 +1,11 @@
 package requests;
 
-import models.AuthToken;
-
 public class ListGamesRequest {
 
     /**
      * the user's authentication token for the current session
      */
-    private String authToken;
+    private final String authToken;
 
     /**
      * create a request to list a representation of all the games in the database

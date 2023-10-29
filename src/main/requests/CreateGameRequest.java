@@ -1,13 +1,11 @@
 package requests;
 
-import models.AuthToken;
-
 public class CreateGameRequest {
 
     /**
      * the name of the game to be created
      */
-    private String gameName;
+    private final String gameName;
 
     /**
      * Create a new request to add a new game to the database

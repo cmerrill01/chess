@@ -44,7 +44,7 @@ public class ServiceTests {
 
     @Test
     public void clearSuccess() {
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getUserTable().put(testUser.getUsername(), testUser);
         db.getGameTable().put(testGame.getGameID(), testGame);
         ClearApplicationResponse successResponse = new ClearApplicationResponse();
@@ -93,7 +93,7 @@ public class ServiceTests {
 
         Assertions.assertNotNull(db.getAuthTokenTable().get(response.getAuthToken()), "AuthToken not found in database for logged-in user");
         Assertions.assertEquals(testUser.getUsername(), response.getUsername(), "Response does not include the user's username");
-        Assertions.assertEquals(db.getAuthTokenTable().get(response.getAuthToken()).getAuthToken(), response.getAuthToken(), "Response does not include the correct token");
+        Assertions.assertEquals(db.getAuthTokenTable().get(response.getAuthToken()).authToken(), response.getAuthToken(), "Response does not include the correct token");
         Assertions.assertNull(response.getMessage(), "Response should not include a message");
     }
 
@@ -125,59 +125,43 @@ public class ServiceTests {
         Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 
-    // If this is a problem, reactivate this test
-    public void loginFailAlreadyLoggedIn() {
-        db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
-
-        LoginRequest request = new LoginRequest("test_username", "test_password");
-        LoginService service = new LoginService();
-        LoginResponse response = service.login(request, db);
-
-        Assertions.assertEquals(testToken, db.getAuthTokenTable().get(testToken.getAuthToken()), "Token should not have been replaced");
-        Assertions.assertEquals(1, db.getAuthTokenTable().size(), "A new token should not have been created");
-        Assertions.assertNull(response.getUsername(), "Response should not include a username");
-        Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
-        Assertions.assertEquals("Error: already logged in", response.getMessage(), "Response message incorrect");
-    }
-
     @Test
     public void logoutSuccess() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
 
         LogoutRequest request = new LogoutRequest("test_token");
         LogoutService service = new LogoutService();
         LogoutResponse response = service.logout(request, db);
 
-        Assertions.assertNull(db.getAuthTokenTable().get(testToken.getAuthToken()), "The token should have been removed from the database");
+        Assertions.assertNull(db.getAuthTokenTable().get(testToken.authToken()), "The token should have been removed from the database");
         Assertions.assertNull(response.getMessage(), "The response should not include a message");
     }
 
     @Test
     public void logoutFail() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
 
         LogoutRequest request = new LogoutRequest("incorrect_token");
         LogoutService service = new LogoutService();
         LogoutResponse response = service.logout(request, db);
 
-        Assertions.assertNotNull(db.getAuthTokenTable().get(testToken.getAuthToken()), "Token should not have been removed");
+        Assertions.assertNotNull(db.getAuthTokenTable().get(testToken.authToken()), "Token should not have been removed");
         Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 
     @Test
     public void listGamesSuccess() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
         db.getGameTable().put(otherTestGame.getGameID(), otherTestGame);
         Set<Game> gameList = new TreeSet<>();
         gameList.add(testGame);
         gameList.add(otherTestGame);
 
-        ListGamesRequest request = new ListGamesRequest(testToken.getAuthToken());
+        ListGamesRequest request = new ListGamesRequest(testToken.authToken());
         ListGamesService service = new ListGamesService();
         ListGamesResponse response = service.listGames(request, db);
 
@@ -188,12 +172,9 @@ public class ServiceTests {
     @Test
     public void listGamesFail() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
         db.getGameTable().put(otherTestGame.getGameID(), otherTestGame);
-        Set<Game> gameList = new TreeSet<>();
-        gameList.add(testGame);
-        gameList.add(otherTestGame);
 
         ListGamesRequest request = new ListGamesRequest("incorrect_token");
         ListGamesService service = new ListGamesService();
@@ -206,7 +187,7 @@ public class ServiceTests {
     @Test
     public void createGameSuccess() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
 
         CreateGameRequest request = new CreateGameRequest("test_game");
         CreateGameService service = new CreateGameService();
@@ -231,7 +212,7 @@ public class ServiceTests {
     @Test
     public void joinGameSuccessPlayer() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
 
         JoinGameRequest request = new JoinGameRequest(testGame.getGameID(), ChessGame.TeamColor.WHITE);
@@ -246,7 +227,7 @@ public class ServiceTests {
     @Test
     public void joinGameSuccessViewer() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
 
         JoinGameRequest request = new JoinGameRequest(testGame.getGameID());
@@ -262,7 +243,7 @@ public class ServiceTests {
     @Test
     public void joinGameFailAlreadyTaken() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         testGame.setBlackUsername("other_username");
         db.getGameTable().put(testGame.getGameID(), testGame);
 
@@ -278,7 +259,7 @@ public class ServiceTests {
     @Test
     public void joinGameFailBadRequest() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getAuthTokenTable().put(testToken.authToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
 
         JoinGameRequest request = new JoinGameRequest(3, ChessGame.TeamColor.WHITE);

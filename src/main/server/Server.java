@@ -109,7 +109,7 @@ public class Server {
                 res.status(401);
             } else {
                 JoinGameRequest request = new Gson().fromJson(req.body(), JoinGameRequest.class);
-                request.setUsername(authDAO.findAuthToken(authToken).getUsername());
+                request.setUsername(authDAO.findAuthToken(authToken).username());
                 JoinGameService service = new JoinGameService();
                 response = service.joinGame(request, db);
                 if (Objects.equals(response.getMessage(), "Error: bad request")) res.status(400);

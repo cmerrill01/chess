@@ -7,16 +7,16 @@ public class User {
     /**
      * the user's username, used to log in and join games
      */
-    private String username;
+    private final String username;
     /**
      * the user's password, used to log in. This is the only field that can be changed after the account is
      * created
      */
-    private String password;
+    private final String password;
     /**
      * the user's email, which is not used for anything
      */
-    private String email;
+    private final String email;
 
     /**
      * Create a new user account (not yet added to the database)
@@ -36,14 +36,6 @@ public class User {
 
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-
-    }
-
-    public void setEmail(String email) {
-
     }
 
     @Override

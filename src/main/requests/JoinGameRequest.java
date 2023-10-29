@@ -1,7 +1,6 @@
 package requests;
 
 import chess.ChessGame;
-import models.AuthToken;
 
 public class JoinGameRequest {
 
@@ -12,7 +11,7 @@ public class JoinGameRequest {
     /**
      * the id # of the game the user wishes to join
      */
-    private int gameID;
+    private final int gameID;
     /**
      * the username of the user who wishes to join the game
      */

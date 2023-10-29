@@ -4,7 +4,6 @@ import daos.AuthDAO;
 import daos.GameDAO;
 import daos.memoryDatabase;
 import dataAccess.DataAccessException;
-import models.AuthToken;
 import requests.ListGamesRequest;
 import responses.ListGamesResponse;
 

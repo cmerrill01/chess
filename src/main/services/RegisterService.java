@@ -34,7 +34,7 @@ public class RegisterService {
         try {
             usersAccess.insertUser(user);
             tokensAccess.insertAuthToken(token);
-            response = new RegisterResponse(user.getUsername(), token.getAuthToken());
+            response = new RegisterResponse(user.getUsername(), token.authToken());
         } catch (DataAccessException e) {
             response = new RegisterResponse(e.getMessage());
         }
