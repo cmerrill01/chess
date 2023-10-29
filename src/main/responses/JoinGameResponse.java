@@ -19,11 +19,11 @@ public class JoinGameResponse {
      * @param message a message indicating why the request to join an existing game was unsuccessful
      */
     public JoinGameResponse(String message) {
-
+        this.message = message;
     }
 
     public String getMessage() {
-        return null;
+        return message;
     }
 
 }

@@ -6,10 +6,6 @@ import models.AuthToken;
 public class JoinGameRequest {
 
     /**
-     * the user's authentication token for the current session
-     */
-    private AuthToken authToken;
-    /**
      * the color of the team that the user wishes to join as
      */
     private ChessGame.TeamColor playerColor;
@@ -17,36 +13,43 @@ public class JoinGameRequest {
      * the id # of the game the user wishes to join
      */
     private int gameID;
+    /**
+     * the username of the user who wishes to join the game
+     */
+    private String username;
 
     /**
      * Create a new request to join an existing game as a player
-     * @param authToken the user's authentication token for the current session
      * @param gameID the id # of the game the user wishes to join
      * @param playerColor the color of the team that the user wishes to join as
      */
-    public JoinGameRequest(AuthToken authToken, int gameID, ChessGame.TeamColor playerColor) {
-
+    public JoinGameRequest(Integer gameID, ChessGame.TeamColor playerColor) {
+        this.gameID = gameID;
+        this.playerColor = playerColor;
     }
 
     /**
      * Create a new request to join an existing game as an observer
-     * @param authToken the user's authentication token for the current session
      * @param gameID the id # of the game the user wishes to join
      */
-    public JoinGameRequest(AuthToken authToken, int gameID) {
-
+    public JoinGameRequest(int gameID) {
+        this.gameID = gameID;
     }
 
-    public AuthToken getAuthToken() {
-        return null;
-    }
 
     public ChessGame.TeamColor getPlayerColor() {
-        return null;
+        return playerColor;
     }
 
     public int getGameID() {
-        return 0;
+        return gameID;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

@@ -73,7 +73,13 @@ public class GameDAO {
      * @throws DataAccessException if the user is not successfully assigned as the desired player in the game
      */
     public void claimSpotInGame(String username, int gameId, ChessGame.TeamColor teamColor) throws DataAccessException {
-
+        if (teamColor == ChessGame.TeamColor.WHITE && games.get(gameId).getWhiteUsername() == null) {
+            games.get(gameId).setWhiteUsername(username);
+        } else if (teamColor == ChessGame.TeamColor.BLACK && games.get(gameId).getBlackUsername() == null) {
+            games.get(gameId).setBlackUsername(username);
+        } else if (teamColor != null) {
+            throw new DataAccessException("Error: already taken");
+        }
     }
 
     /**

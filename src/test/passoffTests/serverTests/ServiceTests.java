@@ -1,5 +1,6 @@
 package passoffTests.serverTests;
 
+import chess.ChessGame;
 import daos.memoryDatabase;
 import models.*;
 import org.junit.jupiter.api.*;
@@ -25,7 +26,9 @@ public class ServiceTests {
         testToken = new AuthToken("test_username", "test_token");
         testUser = new User("test_username", "test_password", "test_email");
         testGame = new Game("test_game_name");
+        testGame.setGameID(1);
         otherTestGame = new Game("other_game_name");
+        otherTestGame.setGameID(2);
     }
 
     @BeforeEach
@@ -33,6 +36,10 @@ public class ServiceTests {
         db.getAuthTokenTable().clear();
         db.getUserTable().clear();
         db.getGameTable().clear();
+        testGame.setWhiteUsername(null);
+        testGame.setBlackUsername(null);
+        otherTestGame.setWhiteUsername(null);
+        otherTestGame.setBlackUsername(null);
     }
 
     @Test
@@ -218,6 +225,69 @@ public class ServiceTests {
         CreateGameResponse response = service.createGame(request, db);
 
         Assertions.assertTrue(db.getGameTable().isEmpty(), "No game should have been added to the database");
+        Assertions.assertEquals("Error: bad request", response.getMessage(), "Response message incorrect");
+    }
+
+    @Test
+    public void joinGameSuccessPlayer() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getGameTable().put(testGame.getGameID(), testGame);
+
+        JoinGameRequest request = new JoinGameRequest(testGame.getGameID(), ChessGame.TeamColor.WHITE);
+        request.setUsername(testUser.getUsername());
+        JoinGameService service = new JoinGameService();
+        JoinGameResponse response = service.joinGame(request, db);
+
+        Assertions.assertEquals(testUser.getUsername(), testGame.getWhiteUsername(), "White username does not equal the requested username");
+        Assertions.assertNull(response.getMessage(), "Response should not include a message");
+    }
+
+    @Test
+    public void joinGameSuccessViewer() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getGameTable().put(testGame.getGameID(), testGame);
+
+        JoinGameRequest request = new JoinGameRequest(testGame.getGameID());
+        JoinGameService service = new JoinGameService();
+        request.setUsername(testUser.getUsername());
+        JoinGameResponse response = service.joinGame(request, db);
+
+        Assertions.assertNull(testGame.getWhiteUsername(), "White username should be null");
+        Assertions.assertNull(testGame.getBlackUsername(), "Black username should be null");
+        Assertions.assertNull(response.getMessage(), "Response should not include a message");
+    }
+
+    @Test
+    public void joinGameFailAlreadyTaken() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        testGame.setBlackUsername("other_username");
+        db.getGameTable().put(testGame.getGameID(), testGame);
+
+        JoinGameRequest request = new JoinGameRequest(testGame.getGameID(), ChessGame.TeamColor.BLACK);
+        JoinGameService service = new JoinGameService();
+        request.setUsername(testUser.getUsername());
+        JoinGameResponse response = service.joinGame(request, db);
+
+        Assertions.assertEquals("other_username", testGame.getBlackUsername(), "Black username should not have been replaced");
+        Assertions.assertEquals("Error: already taken", response.getMessage(), "Response message incorrect");
+    }
+
+    @Test
+    public void joinGameFailBadRequest() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+        db.getGameTable().put(testGame.getGameID(), testGame);
+
+        JoinGameRequest request = new JoinGameRequest(3, ChessGame.TeamColor.WHITE);
+        JoinGameService service = new JoinGameService();
+        request.setUsername(testUser.getUsername());
+        JoinGameResponse response = service.joinGame(request, db);
+
+        Assertions.assertNull(testGame.getWhiteUsername(), "White username should be null");
+        Assertions.assertNull(testGame.getBlackUsername(), "Black username should be null");
         Assertions.assertEquals("Error: bad request", response.getMessage(), "Response message incorrect");
     }
 
