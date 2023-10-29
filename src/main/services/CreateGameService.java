@@ -19,18 +19,16 @@ public class CreateGameService {
      */
     public CreateGameResponse createGame(CreateGameRequest request, memoryDatabase db) {
 
+        if (request.getGameName() == null) return new CreateGameResponse("Error: bad request");
+
         CreateGameResponse response;
 
         AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
         GameDAO gameDAO = new GameDAO(db.getGameTable());
 
         try {
-            if (authDAO.findAuthToken(request.getAuthToken()) == null) {
-                response = new CreateGameResponse("Error: unauthorized");
-            } else {
-                int gameID = gameDAO.insertGame(new Game(request.getGameName()));
-                response = new CreateGameResponse(gameID);
-            }
+            int gameID = gameDAO.insertGame(new Game(request.getGameName()));
+            response = new CreateGameResponse(gameID);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }

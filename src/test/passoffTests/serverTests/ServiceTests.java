@@ -201,7 +201,7 @@ public class ServiceTests {
         db.getUserTable().put(testUser.getUsername(), testUser);
         db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
 
-        CreateGameRequest request = new CreateGameRequest("test_token", "test_game");
+        CreateGameRequest request = new CreateGameRequest("test_game");
         CreateGameService service = new CreateGameService();
         CreateGameResponse response = service.createGame(request, db);
 
@@ -213,12 +213,12 @@ public class ServiceTests {
     public void createGameFail() {
         db.getUserTable().put(testUser.getUsername(), testUser);
 
-        CreateGameRequest request = new CreateGameRequest("test_token", "test_game");
+        CreateGameRequest request = new CreateGameRequest(null);
         CreateGameService service = new CreateGameService();
         CreateGameResponse response = service.createGame(request, db);
 
         Assertions.assertTrue(db.getGameTable().isEmpty(), "No game should have been added to the database");
-        Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
+        Assertions.assertEquals("Error: bad request", response.getMessage(), "Response message incorrect");
     }
 
 }
