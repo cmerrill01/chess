@@ -31,7 +31,8 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
         Spark.delete("session", this::logout);
-        Spark.get("game",  this::listGames);
+        Spark.get("/game",  this::listGames);
+        Spark.post("/game", this::createGame);
     }
 
     private Object clear(Request req, Response res) {

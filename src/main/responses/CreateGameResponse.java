@@ -1,13 +1,11 @@
 package responses;
 
-import requests.CreateGameRequest;
-
 public class CreateGameResponse {
 
     /**
      * the id # for the game that was successfully added to the database
      */
-    private int gameID;
+    private Integer gameID;
     /**
      * a message indicating why the game was not successfully added to the database
      */
@@ -30,11 +28,11 @@ public class CreateGameResponse {
         this.message = message;
     }
 
-    public void setGameID(int gameID) {
+    public void setGameID(Integer gameID) {
         this.gameID = gameID;
     }
 
-    public int getGameID() {
+    public Integer getGameID() {
         return gameID;
     }
 
