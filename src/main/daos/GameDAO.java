@@ -3,7 +3,7 @@ package daos;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
 import models.Game;
-
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,11 +32,18 @@ public class GameDAO {
 
     /**
      * insert a new game into the database
-     * @param gameToInsert the game to be added to the database
-     * @throws DataAccessException if the game is not successfully added
+     * @param gameToInsert the game to be inserted into the database
+     * @return the system-assigned game id by which this game will be found in the database
+     * @throws DataAccessException if the game is not successfully added to the database
      */
-    public void insertGame(Game gameToInsert) throws DataAccessException {
-        games.put(gameToInsert.getGameID(), gameToInsert);
+    public int insertGame(Game gameToInsert) throws DataAccessException {
+        // find the maximum game id and give this game the id one above that id before adding it to the db
+        int gameID;
+        if (games.isEmpty()) gameID = 1;
+        else gameID = Collections.max(games.keySet()) + 1;
+        gameToInsert.setGameID(gameID);
+        games.put(gameID, gameToInsert);
+        return gameID;
     }
 
     /**

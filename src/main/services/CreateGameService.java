@@ -1,5 +1,10 @@
 package services;
 
+import daos.AuthDAO;
+import daos.GameDAO;
+import daos.memoryDatabase;
+import dataAccess.DataAccessException;
+import models.Game;
 import requests.CreateGameRequest;
 import responses.CreateGameResponse;
 
@@ -12,8 +17,25 @@ public class CreateGameService {
      * @return a response indicating whether the game was successfully created and, if so, providing an id #
      * for the new game
      */
-    public CreateGameResponse createGame(CreateGameRequest request) {
-        return null;
+    public CreateGameResponse createGame(CreateGameRequest request, memoryDatabase db) {
+
+        CreateGameResponse response;
+
+        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
+        GameDAO gameDAO = new GameDAO(db.getGameTable());
+
+        try {
+            if (authDAO.findAuthToken(request.getAuthToken()) == null) {
+                response = new CreateGameResponse("Error: unauthorized");
+            } else {
+                int gameID = gameDAO.insertGame(new Game(request.getGameName()));
+                response = new CreateGameResponse(gameID);
+            }
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return response;
     }
 
 }

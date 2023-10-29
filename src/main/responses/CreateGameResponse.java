@@ -19,7 +19,7 @@ public class CreateGameResponse {
      * @param gameID the id # for the game that was successfully added to the database
      */
     public CreateGameResponse(int gameID) {
-
+        this.gameID = gameID;
     }
 
     /**
@@ -27,15 +27,19 @@ public class CreateGameResponse {
      * @param message a message indicating why the game was not successfully added to the database
      */
     public CreateGameResponse(String message) {
+        this.message = message;
+    }
 
+    public void setGameID(int gameID) {
+        this.gameID = gameID;
     }
 
     public int getGameID() {
-        return 0;
+        return gameID;
     }
 
     public String getMessage() {
-        return null;
+        return message;
     }
 
 }

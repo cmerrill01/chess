@@ -24,8 +24,8 @@ public class ServiceTests {
         db = new memoryDatabase();
         testToken = new AuthToken("test_username", "test_token");
         testUser = new User("test_username", "test_password", "test_email");
-        testGame = new Game("test_game_name", 1);
-        otherTestGame = new Game("other_game_name", 2);
+        testGame = new Game("test_game_name");
+        otherTestGame = new Game("other_game_name");
     }
 
     @BeforeEach
@@ -37,7 +37,7 @@ public class ServiceTests {
 
     @Test
     public void clearSuccess() {
-        db.getAuthTokenTable().put(testToken.getUsername(), testToken);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
         db.getUserTable().put(testUser.getUsername(), testUser);
         db.getGameTable().put(testGame.getGameID(), testGame);
         ClearApplicationResponse successResponse = new ClearApplicationResponse();
@@ -101,7 +101,7 @@ public class ServiceTests {
         Assertions.assertNull(db.getAuthTokenTable().get(request.getUsername()), "Non-existent user should not have been given a token");
         Assertions.assertNull(response.getUsername(), "Response should not include a username");
         Assertions.assertNull(response.getAuthToken(), "Response should not include an AuthToken");
-        Assertions.assertEquals("Error: username does not exist", response.getMessage(), "Response message incorrect");
+        Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 
     @Test
@@ -150,13 +150,13 @@ public class ServiceTests {
     @Test
     public void logoutFail() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getUsername(), testToken);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
 
         LogoutRequest request = new LogoutRequest("incorrect_token");
         LogoutService service = new LogoutService();
         LogoutResponse response = service.logout(request, db);
 
-        Assertions.assertNotNull(db.getAuthTokenTable().get(testToken.getUsername()), "Token should not have been removed");
+        Assertions.assertNotNull(db.getAuthTokenTable().get(testToken.getAuthToken()), "Token should not have been removed");
         Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 
@@ -181,7 +181,7 @@ public class ServiceTests {
     @Test
     public void listGamesFail() {
         db.getUserTable().put(testUser.getUsername(), testUser);
-        db.getAuthTokenTable().put(testToken.getUsername(), testToken);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
         db.getGameTable().put(testGame.getGameID(), testGame);
         db.getGameTable().put(otherTestGame.getGameID(), otherTestGame);
         Set<Game> gameList = new TreeSet<>();
@@ -193,6 +193,31 @@ public class ServiceTests {
         ListGamesResponse response = service.listGames(request, db);
 
         Assertions.assertNull(response.getGamesList(), "Response should not include a list of games");
+        Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
+    }
+
+    @Test
+    public void createGameSuccess() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+        db.getAuthTokenTable().put(testToken.getAuthToken(), testToken);
+
+        CreateGameRequest request = new CreateGameRequest("test_token", "test_game");
+        CreateGameService service = new CreateGameService();
+        CreateGameResponse response = service.createGame(request, db);
+
+        Assertions.assertNotNull(db.getGameTable().get(response.getGameID()), "No game was added to the database with an id of 1");
+        Assertions.assertEquals("test_game", db.getGameTable().get(response.getGameID()).getGameName(), "No game was added to the database with the requested name");
+    }
+
+    @Test
+    public void createGameFail() {
+        db.getUserTable().put(testUser.getUsername(), testUser);
+
+        CreateGameRequest request = new CreateGameRequest("test_token", "test_game");
+        CreateGameService service = new CreateGameService();
+        CreateGameResponse response = service.createGame(request, db);
+
+        Assertions.assertTrue(db.getGameTable().isEmpty(), "No game should have been added to the database");
         Assertions.assertEquals("Error: unauthorized", response.getMessage(), "Response message incorrect");
     }
 

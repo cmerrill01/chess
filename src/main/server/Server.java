@@ -7,6 +7,7 @@ import responses.*;
 import services.*;
 import spark.*;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -28,6 +29,7 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
         Spark.delete("session", this::logout);
+        Spark.get("game",  this::listGames);
     }
 
     private Object clear(Request req, Response res) {
@@ -63,6 +65,15 @@ public class Server {
         LogoutResponse response = service.logout(request, db);
         if (Objects.equals(response.getMessage(), "Error: unauthorized")) res.status(401);
         return new Gson().toJson(response, LogoutResponse.class);
+    }
+
+    private Object listGames(Request req, Response res) {
+        System.out.println("Received headers: " + req.headers());
+        ListGamesRequest request = new ListGamesRequest(req.headers("Authorization"));
+        ListGamesService service = new ListGamesService();
+        ListGamesResponse response = service.listGames(request, db);
+        if (Objects.equals(response.getMessage(), "Error: unauthorized")) res.status(401);
+        return new Gson().toJson(response, ListGamesResponse.class);
     }
 
 }

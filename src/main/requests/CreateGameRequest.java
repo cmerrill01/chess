@@ -7,7 +7,7 @@ public class CreateGameRequest {
     /**
      * the user's authentication token for the current session
      */
-    private AuthToken authToken;
+    private String authToken;
     /**
      * the name of the game to be created
      */
@@ -18,16 +18,17 @@ public class CreateGameRequest {
      * @param authToken the user's authentication token for the current session
      * @param gameName the name of the game to be created
      */
-    public CreateGameRequest(AuthToken authToken, String gameName) {
-
+    public CreateGameRequest(String authToken, String gameName) {
+        this.authToken = authToken;
+        this.gameName = gameName;
     }
 
-    public AuthToken getAuthToken() {
-        return null;
+    public String getAuthToken() {
+        return authToken;
     }
 
     public String getGameName() {
-        return null;
+        return gameName;
     }
 
 }

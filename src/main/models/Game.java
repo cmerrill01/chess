@@ -31,17 +31,19 @@ public class Game implements Comparable {
 
     /**
      * Create a new game (not yet added to the database)
-     * @param gameName a unique identifier #, assigned to the game by the system upon creation
-     * @param gameID a nickname for the game, assigned to the game by the user upon creation
+     * @param gameName a nickname for the game, assigned to the game by the user upon creation
      */
-    public Game(String gameName, int gameID) {
-        this.gameID = gameID;
+    public Game(String gameName) {
         this.gameName = gameName;
         game = new ChessGameImpl();
     }
 
     public int getGameID() {
         return gameID;
+    }
+
+    public void setGameID(int gameID) {
+        this.gameID = gameID;
     }
 
     public String getWhiteUsername() {
