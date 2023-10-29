@@ -9,7 +9,6 @@ import responses.*;
 import services.*;
 import spark.*;
 
-import java.util.List;
 import java.util.Objects;
 
 
@@ -33,6 +32,7 @@ public class Server {
         Spark.delete("session", this::logout);
         Spark.get("/game",  this::listGames);
         Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
     }
 
     private Object clear(Request req, Response res) {
@@ -95,6 +95,30 @@ public class Server {
             response = new CreateGameResponse(e.getMessage());
         }
         return new Gson().toJson(response, CreateGameResponse.class);
+    }
+
+    private Object joinGame(Request req, Response res) {
+        System.out.println("Received headers: " + req.headers());
+        System.out.println("Received body: " + req.body());
+        JoinGameResponse response;
+        try {
+            AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
+            String authToken = req.headers("Authorization");
+            if (authDAO.findAuthToken(authToken) == null) {
+                response = new JoinGameResponse("Error: unauthorized");
+                res.status(401);
+            } else {
+                JoinGameRequest request = new Gson().fromJson(req.body(), JoinGameRequest.class);
+                request.setUsername(authDAO.findAuthToken(authToken).getUsername());
+                JoinGameService service = new JoinGameService();
+                response = service.joinGame(request, db);
+                if (Objects.equals(response.getMessage(), "Error: bad request")) res.status(400);
+                else if (Objects.equals(response.getMessage(), "Error: already taken")) res.status(403);
+            }
+        } catch (DataAccessException e) {
+            response = new JoinGameResponse(e.getMessage());
+        }
+        return new Gson().toJson(response, JoinGameResponse.class);
     }
 
 }
