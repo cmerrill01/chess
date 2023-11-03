@@ -17,15 +17,21 @@ public class DAOTests {
 
     private static Database db;
     private static User testUser;
+    private static User testUser2;
     private static AuthToken testToken;
+    private static AuthToken testToken2;
     private static Game testGame;
+    private static Game testGame2;
 
     @BeforeAll
     public static void initializeVariables() {
         db = new Database();
         testUser = new User("peter", "th!sR0ck", "peter@galilee.net");
-        testToken = new AuthToken("peter", UUID.randomUUID().toString());
+        testUser2 = new User("paul", "2G3nt!l3s", "paul@tarsus.com");
+        testToken = new AuthToken(testUser.getUsername(), UUID.randomUUID().toString());
+        testToken2 = new AuthToken(testUser2.getUsername(), UUID.randomUUID().toString());
         testGame = new Game("joppa");
+        testGame2 = new Game("damascus");
     }
 
     @BeforeEach
@@ -35,7 +41,7 @@ public class DAOTests {
         GameDAO gameDAO = new GameDAO(db);
         try {
             userDAO.clearUsers();
-            // authDAO.clearAuthTokens();
+            authDAO.clearAuthTokens();
             // gameDAO.clearGames();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
@@ -47,7 +53,7 @@ public class DAOTests {
         UserDAO userDAO = new UserDAO(db);
         try {
             userDAO.insertUser(testUser);
-            Assertions.assertEquals(testUser, userDAO.findUser(testUser.getUsername()));
+            Assertions.assertEquals(testUser, userDAO.findUser(testUser.getUsername()), "Failed to find user after insertion into the database");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -58,7 +64,7 @@ public class DAOTests {
         UserDAO userDAO = new UserDAO(db);
         try {
             userDAO.insertUser(testUser);
-            Assertions.assertThrows(DataAccessException.class, () -> userDAO.insertUser(testUser));
+            Assertions.assertThrows(DataAccessException.class, () -> userDAO.insertUser(testUser), "Insertion of a duplicate user should not be allowed");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +76,115 @@ public class DAOTests {
         try {
             userDAO.insertUser(testUser);
             userDAO.clearUsers();
-            Assertions.assertNull(userDAO.findUser(testUser.getUsername()));
+            Assertions.assertNull(userDAO.findUser(testUser.getUsername()), "No users should be retrieved from the database after it has been cleared");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findUserSuccess() {
+        UserDAO userDAO = new UserDAO(db);
+        try {
+            userDAO.insertUser(testUser);
+            userDAO.insertUser(testUser2);
+            User userFromDB = userDAO.findUser(testUser.getUsername());
+            Assertions.assertEquals(testUser, userFromDB, "Failed to retrieve the correct user information from the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findUserFail() {
+        UserDAO userDAO = new UserDAO(db);
+        try {
+            userDAO.insertUser(testUser);
+            Assertions.assertNull(userDAO.findUser(testUser2.getUsername()), "The database should not return a user with a username not in the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void insertAuthTokenSuccess() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            Assertions.assertEquals(testToken, authDAO.findAuthToken(testToken.authToken()), "Unable to find expected AuthToken");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void insertAuthTokenFail() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            Assertions.assertThrows(DataAccessException.class, () -> authDAO.insertAuthToken(testToken));
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findAuthTokenSuccess() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            authDAO.insertAuthToken(testToken2);
+            AuthToken tokenFromDB = authDAO.findAuthToken(testToken.authToken());
+            Assertions.assertEquals(testToken, tokenFromDB);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findAuthTokenFail() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            Assertions.assertNull(authDAO.findAuthToken(testToken2.authToken()), "The database should not return a token not in the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void removeAuthTokenSuccess() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            authDAO.insertAuthToken(testToken2);
+            authDAO.removeAuthToken(testToken.authToken());
+            Assertions.assertNull(authDAO.findAuthToken(testToken.authToken()), "A token should not be found in the database after it is removed");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void removeAuthTokenFail() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken2);
+            Assertions.assertEquals(testToken2, authDAO.findAuthToken(testToken2.authToken()), "No token should have been removed from the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void clearAuthTokensSuccess() {
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            authDAO.insertAuthToken(testToken);
+            authDAO.insertAuthToken(testToken2);
+            authDAO.clearAuthTokens();
+            Assertions.assertNull(authDAO.findAuthToken(testToken.authToken()), "No tokens should have been found in the database");
+            Assertions.assertNull(authDAO.findAuthToken(testToken2.authToken()), "No tokens should have been found in the database");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
