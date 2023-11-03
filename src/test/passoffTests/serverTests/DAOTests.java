@@ -35,8 +35,8 @@ public class DAOTests {
         GameDAO gameDAO = new GameDAO(db);
         try {
             userDAO.clearUsers();
-            authDAO.clearAuthTokens();
-            gameDAO.clearGames();
+            // authDAO.clearAuthTokens();
+            // gameDAO.clearGames();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
