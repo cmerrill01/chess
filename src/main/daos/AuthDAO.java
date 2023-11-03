@@ -1,6 +1,7 @@
 package daos;
 
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import models.AuthToken;
 
 import java.util.*;
@@ -15,7 +16,7 @@ public class AuthDAO {
     /**
      * Create a new DAO to access the set of authentication tokens
      */
-    public AuthDAO() {
+    public AuthDAO(Database database) {
 
     }
 

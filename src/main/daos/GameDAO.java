@@ -2,6 +2,7 @@ package daos;
 
 import chess.ChessGame;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import models.Game;
 import java.util.Collections;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class GameDAO {
     /**
      * Create a new DAO to access the games in the database
      */
-    public GameDAO() {
+    public GameDAO(Database database) {
 
     }
 

@@ -1,6 +1,7 @@
 package daos;
 
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import models.User;
 import java.util.Map;
 
@@ -14,8 +15,8 @@ public class UserDAO {
     /**
      * Create a new DAO for the users in the database
      */
-    public UserDAO() {
-
+    public UserDAO(Database database) {
+        // FIXME: Complete this constructor
     }
 
     /**
