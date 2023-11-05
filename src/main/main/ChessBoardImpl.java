@@ -2,6 +2,9 @@ package main;
 
 import chess.*;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class ChessBoardImpl implements ChessBoard {
 
     private final ChessPiece[][] board;
@@ -107,5 +110,20 @@ public class ChessBoardImpl implements ChessBoard {
             output.append("|\n");
         }
         return output.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoardImpl that = (ChessBoardImpl) o;
+        return Arrays.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(numRows, numCols);
+        result = 31 * result + Arrays.deepHashCode(board);
+        return result;
     }
 }

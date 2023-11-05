@@ -26,7 +26,7 @@ public class Game implements Comparable {
     /**
      * the data and functionality of the chess game
      */
-    private final ChessGame game;
+    private ChessGame game;
 
     /**
      * Create a new game (not yet added to the database)
@@ -63,6 +63,14 @@ public class Game implements Comparable {
 
     public String getGameName() {
         return gameName;
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public void setGame(ChessGame game) {
+        this.game = game;
     }
 
     @Override

@@ -96,4 +96,5 @@ public class ChessMoveImpl implements ChessMove {
         output.append(endCol);
         return output.toString();
     }
+
 }

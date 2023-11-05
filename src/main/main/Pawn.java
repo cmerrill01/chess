@@ -4,6 +4,7 @@ import chess.*;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class Pawn implements ChessPiece {
 
@@ -99,5 +100,18 @@ public class Pawn implements ChessPiece {
         }
 
         return validMoves;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pawn pawn = (Pawn) o;
+        return team == pawn.team && type == pawn.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(team, type);
     }
 }

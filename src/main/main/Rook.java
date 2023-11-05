@@ -4,6 +4,7 @@ import chess.*;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class Rook implements ChessPiece {
 
@@ -135,5 +136,18 @@ public class Rook implements ChessPiece {
         }
 
         return validMoves;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rook rook = (Rook) o;
+        return team == rook.team && type == rook.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(team, type);
     }
 }

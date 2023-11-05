@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import spark.utils.Assert;
 
 import java.util.UUID;
 
@@ -42,7 +43,7 @@ public class DAOTests {
         try {
             userDAO.clearUsers();
             authDAO.clearAuthTokens();
-            // gameDAO.clearGames();
+            gameDAO.clearGames();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -185,6 +186,66 @@ public class DAOTests {
             authDAO.clearAuthTokens();
             Assertions.assertNull(authDAO.findAuthToken(testToken.authToken()), "No tokens should have been found in the database");
             Assertions.assertNull(authDAO.findAuthToken(testToken2.authToken()), "No tokens should have been found in the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void insertGameSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameId = gameDAO.insertGame(testGame);
+            int testGame2Id = gameDAO.insertGame(testGame2);
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameId), "Failed to find the game at the expected ID");
+            Assertions.assertEquals(testGame2, gameDAO.findGame(testGame2Id), "Failed to find the game at the expected ID");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void insertGameFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        Game nullGameName = new Game(null);
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.insertGame(nullGameName), "A game with a null game name should not be inserted into the database");
+    }
+
+    @Test
+    void findGameSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameId = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameId);
+            int testGame2Id = gameDAO.insertGame(testGame2);
+            testGame2.setGameID(testGame2Id);
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameId), "Failed to find the game at the expected ID");
+            Assertions.assertEquals(testGame2, gameDAO.findGame(testGame2Id), "Failed to find the game at the expected ID");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findGameFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameId = gameDAO.insertGame(testGame);
+            Assertions.assertNull(gameDAO.findGame(testGameId + 1), "There should not be a game at the index above the most recent game inserted");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void clearGamesSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameId = gameDAO.insertGame(testGame);
+            int testGame2Id = gameDAO.insertGame(testGame2);
+            gameDAO.clearGames();
+            Assertions.assertNull(gameDAO.findGame(testGameId), "Cleared database should not include any games");
+            Assertions.assertNull(gameDAO.findGame(testGame2Id), "Cleared database should not include any games");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
