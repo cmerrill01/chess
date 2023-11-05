@@ -1,13 +1,17 @@
 package daos;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import deserializers.ChessGameAdapter;
 import models.Game;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 public class GameDAO {
 
@@ -15,12 +19,13 @@ public class GameDAO {
      * the set of all games in the database
      */
     private Map<Integer, Game> games;
+    private Database db;
 
     /**
      * Create a new DAO to access the games in the database
      */
     public GameDAO(Database database) {
-
+        db = database;
     }
 
     /**
@@ -39,11 +44,34 @@ public class GameDAO {
      */
     public int insertGame(Game gameToInsert) throws DataAccessException {
         // find the maximum game id and give this game the id one above that id before adding it to the db
+        /*
         int gameID;
         if (games.isEmpty()) gameID = 1;
         else gameID = Collections.max(games.keySet()) + 1;
         gameToInsert.setGameID(gameID);
         games.put(gameID, gameToInsert);
+        return gameID;
+         */
+        int gameID = 0;
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+                    INSERT INTO games (game_name, game)
+                    VALUES (?, ?);
+                    """, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, gameToInsert.getGameName());
+                preparedStatement.setString(2, new Gson().toJson(gameToInsert.getGame()));
+
+                preparedStatement.executeUpdate();
+
+                try (var result = preparedStatement.getGeneratedKeys()) {
+                    if (result.next()) {
+                        gameID = result.getInt(1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
         return gameID;
     }
 
@@ -54,7 +82,33 @@ public class GameDAO {
      * @throws DataAccessException there is a problem accessing the data
      */
     public Game findGame(int gameIdToFind) throws DataAccessException {
-        return games.get(gameIdToFind);
+        // return games.get(gameIdToFind);
+        Game game;
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+                    SELECT *
+                    FROM games
+                    WHERE game_id = ?
+                    """)) {
+                preparedStatement.setInt(1, gameIdToFind);
+                try (var result = preparedStatement.executeQuery()) {
+                    if (result.next()) {
+                        game = new Game(result.getString("game_name"));
+                        game.setGameID(result.getInt("game_id"));
+                        game.setBlackUsername(result.getString("black_username"));
+                        game.setWhiteUsername(result.getString("white_username"));
+                        var builder = new GsonBuilder();
+                        builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+                        game.setGame(builder.create().fromJson(result.getString("game"), ChessGame.class));
+                    } else {
+                        game = null;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return game;
     }
 
     /**
@@ -107,7 +161,14 @@ public class GameDAO {
      * @throws DataAccessException if all games are not successfully removed from the database
      */
     public void clearGames() throws DataAccessException {
-        games.clear();
+        // games.clear();
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE games")) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
 }
