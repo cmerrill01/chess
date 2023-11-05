@@ -88,7 +88,7 @@ public class GameDAO {
             try (var preparedStatement = conn.prepareStatement("""
                     SELECT *
                     FROM games
-                    WHERE game_id = ?
+                    WHERE game_id = ?;
                     """)) {
                 preparedStatement.setInt(1, gameIdToFind);
                 try (var result = preparedStatement.executeQuery()) {
@@ -117,7 +117,27 @@ public class GameDAO {
      * @throws DataAccessException if the data could not be successfully accessed
      */
     public Set<Game> findAllGames() throws DataAccessException {
-        return new TreeSet<>(games.values());
+        // return new TreeSet<>(games.values());
+        Set<Game> allGames = new TreeSet<>();
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * FROM games;")) {
+                try (var result = preparedStatement.executeQuery()) {
+                    while (result.next()) {
+                        Game game = new Game(result.getString("game_name"));
+                        game.setGameID(result.getInt("game_id"));
+                        game.setBlackUsername(result.getString("black_username"));
+                        game.setWhiteUsername(result.getString("white_username"));
+                        var builder = new GsonBuilder();
+                        builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+                        game.setGame(builder.create().fromJson(result.getString("game"), ChessGame.class));
+                        allGames.add(game);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return allGames;
     }
 
     /**
@@ -128,12 +148,71 @@ public class GameDAO {
      * @throws DataAccessException if the user is not successfully assigned as the desired player in the game
      */
     public void claimSpotInGame(String username, int gameId, ChessGame.TeamColor teamColor) throws DataAccessException {
+        /*
         if (teamColor == ChessGame.TeamColor.WHITE && games.get(gameId).getWhiteUsername() == null) {
             games.get(gameId).setWhiteUsername(username);
         } else if (teamColor == ChessGame.TeamColor.BLACK && games.get(gameId).getBlackUsername() == null) {
             games.get(gameId).setBlackUsername(username);
         } else if (teamColor != null) {
             throw new DataAccessException("Error: already taken");
+        }
+         */
+        try (Connection conn = db.getConnection()) {
+            if (teamColor == ChessGame.TeamColor.WHITE) {
+                try (var preparedQuery = conn.prepareStatement("""
+                        SELECT white_username
+                        FROM games
+                        WHERE game_id = ?;
+                        """)) {
+                    preparedQuery.setInt(1, gameId);
+                    try (var result = preparedQuery.executeQuery()) {
+                        if (result.next()) {
+                            if (result.getString("white_username") == null) {
+                                try (var preparedUpdate = conn.prepareStatement("""
+                                        UPDATE games
+                                        SET white_username = ?
+                                        WHERE game_id = ?;
+                                        """)) {
+                                    preparedUpdate.setString(1, username);
+                                    preparedUpdate.setInt(2, gameId);
+
+                                    preparedUpdate.executeUpdate();
+                                }
+                            } else {
+                                throw new DataAccessException("Error: already taken");
+                            }
+                        }
+                    }
+                }
+            } else if (teamColor == ChessGame.TeamColor.BLACK) {
+                try (var preparedQuery = conn.prepareStatement("""
+                        SELECT black_username
+                        FROM games
+                        WHERE game_id = ?;
+                        """)) {
+                    preparedQuery.setInt(1, gameId);
+                    try (var result = preparedQuery.executeQuery()) {
+                        if (result.next()) {
+                            if (result.getString("black_username") == null) {
+                                try (var preparedUpdate = conn.prepareStatement("""
+                                        UPDATE games
+                                        SET black_username = ?
+                                        WHERE game_id = ?;
+                                        """)) {
+                                    preparedUpdate.setString(1, username);
+                                    preparedUpdate.setInt(2, gameId);
+
+                                    preparedUpdate.executeUpdate();
+                                }
+                            } else {
+                                throw new DataAccessException("Error: already taken");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -144,7 +223,23 @@ public class GameDAO {
      * @throws DataAccessException if the game is not successfully updated
      */
     public void updateGame(int gameIdToUpdate, ChessGame gameUpdated) throws DataAccessException {
+        if (gameUpdated == null) throw new DataAccessException("Error: please provide updated game");
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("""
+                    UPDATE games
+                    SET game = ?
+                    WHERE game_id = ?;
+                    """)) {
+                var builder = new GsonBuilder();
+                builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+                preparedStatement.setString(1, builder.create().toJson(gameUpdated, ChessGame.class));
+                preparedStatement.setInt(2, gameIdToUpdate);
 
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     /**
@@ -153,7 +248,14 @@ public class GameDAO {
      * @throws DataAccessException if the game is not successfully removed
      */
     public void removeGame(int gameIdToRemove) throws DataAccessException {
-
+        try (Connection conn = db.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM games WHERE game_id = ?;")) {
+                preparedStatement.setInt(1, gameIdToRemove);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     /**
@@ -163,7 +265,7 @@ public class GameDAO {
     public void clearGames() throws DataAccessException {
         // games.clear();
         try (Connection conn = db.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE games")) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE games;")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {

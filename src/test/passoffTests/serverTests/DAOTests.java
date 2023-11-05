@@ -1,10 +1,16 @@
 package passoffTests.serverTests;
 
+import chess.ChessGame;
+import chess.InvalidMoveException;
 import daos.AuthDAO;
 import daos.GameDAO;
 import daos.UserDAO;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import main.ChessBoardImpl;
+import main.ChessGameImpl;
+import main.ChessMoveImpl;
+import main.ChessPositionImpl;
 import models.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.utils.Assert;
 
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 public class DAOTests {
@@ -36,7 +44,7 @@ public class DAOTests {
     }
 
     @BeforeEach
-    public void clearDatabase() {
+    public void clearData() {
         UserDAO userDAO = new UserDAO(db);
         AuthDAO authDAO = new AuthDAO(db);
         GameDAO gameDAO = new GameDAO(db);
@@ -47,6 +55,15 @@ public class DAOTests {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+
+        ChessGame defaultGame = new ChessGameImpl();
+        if (!testGame.getGame().equals(defaultGame)) testGame.setGame(new ChessGameImpl());
+        if (!testGame2.getGame().equals(defaultGame)) testGame2.setGame(new ChessGameImpl());
+
+        if (testGame.getWhiteUsername() != null) testGame.setWhiteUsername(null);
+        if (testGame.getBlackUsername() != null) testGame.setBlackUsername(null);
+        if (testGame2.getWhiteUsername() != null) testGame2.setWhiteUsername(null);
+        if (testGame2.getBlackUsername() != null) testGame2.setBlackUsername(null);
     }
 
     @Test
@@ -246,6 +263,148 @@ public class DAOTests {
             gameDAO.clearGames();
             Assertions.assertNull(gameDAO.findGame(testGameId), "Cleared database should not include any games");
             Assertions.assertNull(gameDAO.findGame(testGame2Id), "Cleared database should not include any games");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findAllGamesSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+            int testGame2ID = gameDAO.insertGame(testGame2);
+            testGame2.setGameID(testGame2ID);
+            Set<Game> games = new TreeSet<>();
+            games.add(testGame);
+            games.add(testGame2);
+            Assertions.assertEquals(games, gameDAO.findAllGames(), "Failed to retrieve a list of all games from the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void findAllGamesFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        Set<Game> games = new TreeSet<>();
+        try {
+            Assertions.assertEquals(games, gameDAO.findAllGames(), "Should return an empty set of games from the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void removeGameSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+            int testGame2ID = gameDAO.insertGame(testGame2);
+            testGame2.setGameID(testGame2ID);
+            Set<Game> games = new TreeSet<>();
+            games.add(testGame2);
+
+            gameDAO.removeGame(testGameID);
+            Assertions.assertEquals(games, gameDAO.findAllGames(), "First test game should have been removed");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void removeGameFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+            int testGame2ID = gameDAO.insertGame(testGame2);
+            testGame2.setGameID(testGame2ID);
+            Set<Game> games = new TreeSet<>();
+            games.add(testGame);
+            games.add(testGame2);
+
+            gameDAO.removeGame(testGame2ID + 1);
+            Assertions.assertEquals(games, gameDAO.findAllGames(), "No game should have been removed when an invalid ID was provided");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void claimSpotInGameSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        UserDAO userDAO = new UserDAO(db);
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            userDAO.insertUser(testUser);
+            authDAO.insertAuthToken(testToken);
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+            testGame.setBlackUsername(testUser.getUsername());
+
+            gameDAO.claimSpotInGame(testUser.getUsername(), testGameID, ChessGame.TeamColor.BLACK);
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameID), "Test user's username should have been added as the white username for the game in the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void claimSpotInGameFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        UserDAO userDAO = new UserDAO(db);
+        AuthDAO authDAO = new AuthDAO(db);
+        try {
+            userDAO.insertUser(testUser);
+            authDAO.insertAuthToken(testToken);
+            userDAO.insertUser(testUser2);
+            authDAO.insertAuthToken(testToken2);
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+            testGame.setWhiteUsername(testUser.getUsername());
+
+            gameDAO.claimSpotInGame(testUser.getUsername(), testGameID, ChessGame.TeamColor.WHITE);
+            Assertions.assertThrows(DataAccessException.class, () ->
+                    gameDAO.claimSpotInGame(testUser2.getUsername(), testGameID, ChessGame.TeamColor.WHITE),
+                    "Test user 2 should not be able to claim to be white in the test game if test user has already claimed it");
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameID), "Test user's username should have been added as the white username for the game in the database");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void updateGameSuccess() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+
+            ChessGame updatedGame = testGame.getGame();
+            updatedGame.setBoard(new ChessBoardImpl());
+            updatedGame.getBoard().resetBoard();
+            updatedGame.makeMove(new ChessMoveImpl(new ChessPositionImpl(2, 4), new ChessPositionImpl(4, 4)));
+
+            gameDAO.updateGame(testGameID, updatedGame);
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameID), "Updated chess game does not match the chess game in the database");
+        } catch (DataAccessException | InvalidMoveException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void updateGameFail() {
+        GameDAO gameDAO = new GameDAO(db);
+        try {
+            int testGameID = gameDAO.insertGame(testGame);
+            testGame.setGameID(testGameID);
+
+            Assertions.assertThrows(DataAccessException.class, () ->
+                    gameDAO.updateGame(testGameID, null));
+            Assertions.assertEquals(testGame, gameDAO.findGame(testGameID), "Chess game should not have been updated in database when provided with a null game");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
