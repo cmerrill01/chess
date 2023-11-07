@@ -1,11 +1,16 @@
 package daos;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import deserializers.ChessBoardAdapter;
 import deserializers.ChessGameAdapter;
+import deserializers.ChessPieceAdapter;
+import main.ChessGameImpl;
 import models.Game;
 
 import java.sql.Connection;
@@ -230,9 +235,7 @@ public class GameDAO {
                     SET game = ?
                     WHERE game_id = ?;
                     """)) {
-                var builder = new GsonBuilder();
-                builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
-                preparedStatement.setString(1, builder.create().toJson(gameUpdated, ChessGame.class));
+                preparedStatement.setString(1, new Gson().toJson(gameUpdated, ChessGameImpl.class));
                 preparedStatement.setInt(2, gameIdToUpdate);
 
                 preparedStatement.executeUpdate();
