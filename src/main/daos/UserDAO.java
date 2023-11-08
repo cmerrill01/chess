@@ -6,29 +6,13 @@ import models.User;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.Objects;
 
 public class UserDAO {
 
-    /*  public boolean example(String selectStatement, Database db) throws DataAccessException{
-     *    var conn = db.getConnection();
-     *    try (var preparedStatement = conn.prepareStatement(selectStatement)) {
-     *        return preparedStatement.execute();
-     *    } catch (SQLException ex) {
-     *        throw new DataAccessException(ex.toString());
-     *    } finally {
-     *        db.returnConnection(conn);
-     *    }
-     *  }
-     */
-
     /**
-     * the set of all users in the database
+     * an object that accesses the MySQL database
      */
-    private Map<String, User> users;
-
-    private Database db;
+    private final Database db;
 
     /**
      * Create a new DAO for the users in the database
@@ -38,21 +22,11 @@ public class UserDAO {
     }
 
     /**
-     * Create a new DAO for users in a memory-based database
-     * @param memoryUserTable a pointer to the table of users in the memory-based database
-     */
-    public UserDAO(Map<String, User> memoryUserTable) {
-        users = memoryUserTable;
-    }
-
-    /**
      * insert a new user into the database
      * @param userToInsert the user to be inserted into the database
      * @throws DataAccessException if the user is not successfully inserted into the database
      */
     public void insertUser(User userToInsert) throws DataAccessException {
-        // if (users.containsKey(userToInsert.getUsername())) throw new DataAccessException("Error: already taken");
-        // users.put(userToInsert.getUsername(), userToInsert);
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("""
                     INSERT INTO users (username, email, password)
@@ -76,7 +50,6 @@ public class UserDAO {
      * @throws DataAccessException if there was a problem accessing the data
      */
     public User findUser(String username) throws DataAccessException {
-        // return users.get(username);
         User user;
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("""
@@ -108,7 +81,6 @@ public class UserDAO {
      * @throws DataAccessException if the users are not successfully removed from the database
      */
     public void clearUsers() throws DataAccessException {
-        // users.clear();
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE users")) {
                 preparedStatement.executeUpdate();

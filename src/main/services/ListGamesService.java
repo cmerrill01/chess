@@ -2,8 +2,8 @@ package services;
 
 import daos.AuthDAO;
 import daos.GameDAO;
-import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import requests.ListGamesRequest;
 import responses.ListGamesResponse;
 
@@ -15,10 +15,10 @@ public class ListGamesService {
      * @return a response indicating whether the request was successful and, if so, providing the requested
      * list of games
      */
-    public ListGamesResponse listGames(ListGamesRequest request, memoryDatabase db) {
+    public ListGamesResponse listGames(ListGamesRequest request, Database db) {
         ListGamesResponse response;
-        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
-        GameDAO gameDAO = new GameDAO(db.getGameTable());
+        AuthDAO authDAO = new AuthDAO(db);
+        GameDAO gameDAO = new GameDAO(db);
 
         try {
             if (authDAO.findAuthToken(request.getAuthToken()) != null) {

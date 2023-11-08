@@ -3,6 +3,7 @@ package services;
 import daos.GameDAO;
 import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import requests.JoinGameRequest;
 import responses.JoinGameResponse;
 
@@ -14,11 +15,11 @@ public class JoinGameService {
      *                (if applicable)
      * @return a response indicating whether the user has successfully joined the game
      */
-    public JoinGameResponse joinGame(JoinGameRequest request, memoryDatabase db) {
+    public JoinGameResponse joinGame(JoinGameRequest request, Database db) {
 
         JoinGameResponse response;
 
-        GameDAO gameDAO = new GameDAO(db.getGameTable());
+        GameDAO gameDAO = new GameDAO(db);
 
         try {
             if (gameDAO.findGame(request.getGameID()) == null) response = new JoinGameResponse("Error: bad request");

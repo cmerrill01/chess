@@ -1,15 +1,11 @@
 package daos;
 
-import chess.ChessBoard;
 import chess.ChessGame;
-import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
-import deserializers.ChessBoardAdapter;
 import deserializers.ChessGameAdapter;
-import deserializers.ChessPieceAdapter;
 import main.ChessGameImpl;
 import models.Game;
 
@@ -21,10 +17,9 @@ import java.util.*;
 public class GameDAO {
 
     /**
-     * the set of all games in the database
+     * An object for establishing connections to the MySQL database
      */
-    private Map<Integer, Game> games;
-    private Database db;
+    private final Database db;
 
     /**
      * Create a new DAO to access the games in the database
@@ -34,29 +29,12 @@ public class GameDAO {
     }
 
     /**
-     * Create a new DAO to access the games from a memory-based database
-     * @param memoryGameTable a pointer to the memory-based table of games
-     */
-    public GameDAO(Map<Integer, Game> memoryGameTable) {
-        games = memoryGameTable;
-    }
-
-    /**
      * insert a new game into the database
      * @param gameToInsert the game to be inserted into the database
      * @return the system-assigned game id by which this game will be found in the database
      * @throws DataAccessException if the game is not successfully added to the database
      */
     public int insertGame(Game gameToInsert) throws DataAccessException {
-        // find the maximum game id and give this game the id one above that id before adding it to the db
-        /*
-        int gameID;
-        if (games.isEmpty()) gameID = 1;
-        else gameID = Collections.max(games.keySet()) + 1;
-        gameToInsert.setGameID(gameID);
-        games.put(gameID, gameToInsert);
-        return gameID;
-         */
         int gameID = 0;
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("""
@@ -87,7 +65,6 @@ public class GameDAO {
      * @throws DataAccessException there is a problem accessing the data
      */
     public Game findGame(int gameIdToFind) throws DataAccessException {
-        // return games.get(gameIdToFind);
         Game game;
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("""
@@ -122,7 +99,6 @@ public class GameDAO {
      * @throws DataAccessException if the data could not be successfully accessed
      */
     public Set<Game> findAllGames() throws DataAccessException {
-        // return new TreeSet<>(games.values());
         Set<Game> allGames = new TreeSet<>();
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT * FROM games;")) {
@@ -153,15 +129,6 @@ public class GameDAO {
      * @throws DataAccessException if the user is not successfully assigned as the desired player in the game
      */
     public void claimSpotInGame(String username, int gameId, ChessGame.TeamColor teamColor) throws DataAccessException {
-        /*
-        if (teamColor == ChessGame.TeamColor.WHITE && games.get(gameId).getWhiteUsername() == null) {
-            games.get(gameId).setWhiteUsername(username);
-        } else if (teamColor == ChessGame.TeamColor.BLACK && games.get(gameId).getBlackUsername() == null) {
-            games.get(gameId).setBlackUsername(username);
-        } else if (teamColor != null) {
-            throw new DataAccessException("Error: already taken");
-        }
-         */
         try (Connection conn = db.getConnection()) {
             if (teamColor == ChessGame.TeamColor.WHITE) {
                 try (var preparedQuery = conn.prepareStatement("""
@@ -266,7 +233,6 @@ public class GameDAO {
      * @throws DataAccessException if all games are not successfully removed from the database
      */
     public void clearGames() throws DataAccessException {
-        // games.clear();
         try (Connection conn = db.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE games;")) {
                 preparedStatement.executeUpdate();

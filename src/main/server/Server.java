@@ -2,8 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import daos.AuthDAO;
-import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import requests.*;
 import responses.*;
 import services.*;
@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class Server {
 
-    private final memoryDatabase db = new memoryDatabase();
+    private final Database db = new Database();
 
     public static void main(String[] args) {
         new Server().run();
@@ -83,7 +83,7 @@ public class Server {
         System.out.println("Received headers: " + req.headers());
         CreateGameResponse response;
         try {
-            if (new AuthDAO(db.getAuthTokenTable()).findAuthToken(req.headers("Authorization")) == null) {
+            if (new AuthDAO(db).findAuthToken(req.headers("Authorization")) == null) {
                 response = new CreateGameResponse("Error: unauthorized");
                 res.status(401);
             } else {
@@ -102,7 +102,7 @@ public class Server {
         System.out.println("Received body: " + req.body());
         JoinGameResponse response;
         try {
-            AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
+            AuthDAO authDAO = new AuthDAO(db);
             String authToken = req.headers("Authorization");
             if (authDAO.findAuthToken(authToken) == null) {
                 response = new JoinGameResponse("Error: unauthorized");

@@ -3,6 +3,7 @@ package services;
 import daos.GameDAO;
 import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import models.Game;
 import requests.CreateGameRequest;
 import responses.CreateGameResponse;
@@ -16,13 +17,13 @@ public class CreateGameService {
      * @return a response indicating whether the game was successfully created and, if so, providing an id #
      * for the new game
      */
-    public CreateGameResponse createGame(CreateGameRequest request, memoryDatabase db) {
+    public CreateGameResponse createGame(CreateGameRequest request, Database db) {
 
         if (request.getGameName() == null) return new CreateGameResponse("Error: bad request");
 
         CreateGameResponse response;
 
-        GameDAO gameDAO = new GameDAO(db.getGameTable());
+        GameDAO gameDAO = new GameDAO(db);
 
         try {
             int gameID = gameDAO.insertGame(new Game(request.getGameName()));

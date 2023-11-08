@@ -2,8 +2,8 @@ package services;
 
 import daos.AuthDAO;
 import daos.UserDAO;
-import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import models.AuthToken;
 import models.User;
 import requests.LoginRequest;
@@ -20,13 +20,13 @@ public class LoginService {
      * @return a response indicating whether login was successful and providing the user with an authentication
      * token
      */
-    public LoginResponse login(LoginRequest request, memoryDatabase db) {
+    public LoginResponse login(LoginRequest request, Database db) {
 
         LoginResponse response;
         User user;
 
-        UserDAO userDAO = new UserDAO(db.getUserTable());
-        AuthDAO authDAO = new AuthDAO(db.getAuthTokenTable());
+        UserDAO userDAO = new UserDAO(db);
+        AuthDAO authDAO = new AuthDAO(db);
 
         try {
             user = userDAO.findUser(request.getUsername());

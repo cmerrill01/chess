@@ -1,8 +1,8 @@
 package services;
 
 import daos.AuthDAO;
-import daos.memoryDatabase;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import requests.LogoutRequest;
 import responses.LogoutResponse;
 
@@ -13,11 +13,11 @@ public class LogoutService {
      * @param request contains the authentication token for the user's current session
      * @return a response indicating whether logout was successful
      */
-    public LogoutResponse logout(LogoutRequest request, memoryDatabase db) {
+    public LogoutResponse logout(LogoutRequest request, Database db) {
 
         LogoutResponse response;
 
-        AuthDAO dao = new AuthDAO(db.getAuthTokenTable());
+        AuthDAO dao = new AuthDAO(db);
 
         try {
             if (dao.findAuthToken(request.getAuthToken()) != null) {
