@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
 import deserializers.ChessGameAdapter;
-import main.ChessGameImpl;
+import chess.ChessGameImpl;
 import models.Game;
 
 import java.sql.Connection;

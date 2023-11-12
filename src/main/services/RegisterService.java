@@ -2,7 +2,6 @@ package services;
 
 import daos.AuthDAO;
 import daos.UserDAO;
-import daos.memoryDatabase;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
 import models.AuthToken;

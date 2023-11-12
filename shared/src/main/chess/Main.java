@@ -1,8 +1,4 @@
-package main;
-
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPosition;
+package chess;
 
 public class Main {
     public static void main(String[] args) {

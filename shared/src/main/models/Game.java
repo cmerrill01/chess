@@ -1,7 +1,7 @@
 package models;
 
 import chess.ChessGame;
-import main.ChessGameImpl;
+import chess.ChessGameImpl;
 
 import java.util.Objects;
 

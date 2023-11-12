@@ -3,7 +3,7 @@ package deserializers;
 import chess.ChessBoard;
 import chess.ChessPiece;
 import com.google.gson.*;
-import main.ChessBoardImpl;
+import chess.ChessBoardImpl;
 
 import java.lang.reflect.Type;
 

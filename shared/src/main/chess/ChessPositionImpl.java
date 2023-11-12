@@ -1,7 +1,5 @@
-package main;
+package chess;
 
-import chess.ChessBoard;
-import chess.ChessPosition;
 import java.util.Objects;
 
 public class ChessPositionImpl implements ChessPosition {
