@@ -1,43 +1,122 @@
 package server;
 
 import chess.ChessGame;
-import models.AuthToken;
-import models.Game;
+import com.google.gson.Gson;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import responses.*;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 
 public class ServerFacade {
 
+    private final String serverUrl;
+
     public ServerFacade(String url) {
-
+        serverUrl = url;
     }
 
-    public void clear() {
-
+    public ClearApplicationResponse clear() {
+        String path = "/db";
+        try {
+            return this.makeRequest("DELETE", path, null, ClearApplicationResponse.class);
+        } catch (ResponseException e) {
+            return new ClearApplicationResponse(e.getMessage());
+        }
     }
 
-    public AuthToken register(String username, String password, String email) {
+    public RegisterResponse register(String username, String password, String email) {
+        String path = "/user";
+        RegisterRequest request = new RegisterRequest(username, password, email);
+        try {
+            return makeRequest("POST", path, request, RegisterResponse.class);
+        } catch (ResponseException e) {
+            return new RegisterResponse(e.getMessage());
+        }
+    }
+
+    public LoginResponse login(String username, String password){
+        String path = "/session";
+        LoginRequest request = new LoginRequest(username, password);
+        try {
+            return makeRequest("POST", path, request, LoginResponse.class);
+        } catch (ResponseException e) {
+            return new LoginResponse(e.getMessage());
+        }
+    }
+
+    public LogoutResponse logout(String authToken) {
         return null;
     }
 
-    public AuthToken login(String username, String password) {
+    public ListGamesResponse listGames(String authToken) {
         return null;
     }
 
-    public void logout(String authToken) {
-
-    }
-
-    public List<Game> listGames(String authToken) {
+    public CreateGameResponse createGame(String gameName) {
         return null;
     }
 
-    public int createGame(String gameName) {
-        return 0;
+    public JoinGameResponse joinGame(ChessGame.TeamColor playerColor, int gameId) {
+        return null;
     }
 
-    public void joinGame(ChessGame.TeamColor playerColor, int gameId) {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
 
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod(method);
+            http.setDoOutput(true);
+
+            writeBody(request, http);
+            http.connect();
+            throwIfNotSuccessful(http);
+            return readBody(http, responseClass);
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+
+    }
+
+    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
+        if (request != null) {
+            http.addRequestProperty("Content-Type", "application/json");
+            String requestData = new Gson().toJson(request);
+            try (OutputStream requestBody = http.getOutputStream()) {
+                requestBody.write(requestData.getBytes());
+            }
+        }
+    }
+
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
+        var status = http.getResponseCode();
+        if (!isSuccessful(status)) {
+            throw new ResponseException(status, "Failure: " + status);
+        }
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
+    }
+
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+        T response = null;
+        if (http.getContentLength() < 0) {
+            try (InputStream responseBody = http.getInputStream()) {
+                InputStreamReader reader = new InputStreamReader(responseBody);
+                if (responseClass != null) {
+                    response = new Gson().fromJson(reader, responseClass);
+                }
+            }
+        }
+        return response;
     }
 
 }
