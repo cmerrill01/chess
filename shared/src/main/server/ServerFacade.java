@@ -3,6 +3,7 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import responses.*;
 
@@ -25,7 +26,7 @@ public class ServerFacade {
     public ClearApplicationResponse clear() {
         String path = "/db";
         try {
-            return this.makeRequest("DELETE", path, null, ClearApplicationResponse.class);
+            return this.makeRequest("DELETE", path, null, null, ClearApplicationResponse.class);
         } catch (ResponseException e) {
             return new ClearApplicationResponse(e.getMessage());
         }
@@ -35,7 +36,7 @@ public class ServerFacade {
         String path = "/user";
         RegisterRequest request = new RegisterRequest(username, password, email);
         try {
-            return makeRequest("POST", path, request, RegisterResponse.class);
+            return makeRequest("POST", path, request, null, RegisterResponse.class);
         } catch (ResponseException e) {
             return new RegisterResponse(e.getMessage());
         }
@@ -45,14 +46,19 @@ public class ServerFacade {
         String path = "/session";
         LoginRequest request = new LoginRequest(username, password);
         try {
-            return makeRequest("POST", path, request, LoginResponse.class);
+            return makeRequest("POST", path, request, null, LoginResponse.class);
         } catch (ResponseException e) {
             return new LoginResponse(e.getMessage());
         }
     }
 
     public LogoutResponse logout(String authToken) {
-        return null;
+        String path = "/session";
+        try {
+            return makeRequest("DELETE", path, null, authToken, LogoutResponse.class);
+        } catch (ResponseException e) {
+            return new LogoutResponse(e.getMessage());
+        }
     }
 
     public ListGamesResponse listGames(String authToken) {
@@ -67,7 +73,7 @@ public class ServerFacade {
         return null;
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws ResponseException {
 
         try {
             URL url = (new URI(serverUrl + path)).toURL();
@@ -76,6 +82,7 @@ public class ServerFacade {
             http.setDoOutput(true);
 
             writeBody(request, http);
+            writeAuthHeader(authToken, http);
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
@@ -94,6 +101,14 @@ public class ServerFacade {
             }
         }
     }
+
+    private static void writeAuthHeader(String authToken, HttpURLConnection http) throws IOException {
+        if (authToken != null) {
+            http.addRequestProperty("Authorization", authToken);
+        }
+    }
+
+
 
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
