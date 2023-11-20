@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import responses.*;
 import server.ServerFacade;
 
+import java.util.List;
+
 
 public class ClientTests {
 
@@ -90,6 +92,37 @@ public class ClientTests {
         CreateGameResponse response = facade.createGame(null, testGameName_1);
         Assertions.assertNull(response.getGameID(), "Failure response contains a game id");
         Assertions.assertNotNull(response.getMessage(), "Failure response does not contain a message");
+    }
+
+    @Test
+    public void listGamesSuccess() {
+        String authToken = facade.register(testUsername, testPassword, testEmail).getAuthToken();
+        facade.createGame(authToken, testGameName_1);
+        facade.createGame(authToken, testGameName_2);
+        ListGamesResponse response = facade.listGames(authToken);
+        Assertions.assertEquals(response.getGamesList().size(), 2, "Success response does not contain a list with two games");
+        Assertions.assertNull(response.getMessage(), "Success response contains a message");
+    }
+
+    @Test
+    public void listGamesFail() {
+        String authToken = facade.register(testUsername, testPassword, testEmail).getAuthToken();
+        facade.createGame(authToken, testGameName_1);
+        facade.createGame(authToken, testGameName_2);
+        facade.logout(authToken);
+        ListGamesResponse response = facade.listGames(authToken);
+        Assertions.assertNull(response.getGamesList(), "Failure response contains a list of games");
+        Assertions.assertNotNull(response.getMessage(), "Failure response does not contain a message");
+    }
+
+    @Test
+    public void joinGameSuccess() {
+
+    }
+
+    @Test
+    public void joinGameFail() {
+
     }
 
 }

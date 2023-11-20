@@ -2,6 +2,8 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import deserializers.ChessGameAdapter;
 import requests.CreateGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
@@ -62,7 +64,12 @@ public class ServerFacade {
     }
 
     public ListGamesResponse listGames(String authToken) {
-        return null;
+        String path = "/game";
+        try {
+            return makeRequest("GET", path, null, authToken, ListGamesResponse.class);
+        } catch (ResponseException e) {
+            return new ListGamesResponse(e.getMessage());
+        }
     }
 
     public CreateGameResponse createGame(String authToken, String gameName) {
@@ -131,7 +138,10 @@ public class ServerFacade {
             try (InputStream responseBody = http.getInputStream()) {
                 InputStreamReader reader = new InputStreamReader(responseBody);
                 if (responseClass != null) {
-                    response = new Gson().fromJson(reader, responseClass);
+                    var builder = new GsonBuilder();
+                    builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+                    response = builder.create().fromJson(reader, responseClass);
+                    // response = new Gson().fromJson(reader, responseClass);
                 }
             }
         }
