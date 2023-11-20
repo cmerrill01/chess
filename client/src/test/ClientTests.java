@@ -1,12 +1,9 @@
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import responses.ClearApplicationResponse;
-import responses.LoginResponse;
-import responses.LogoutResponse;
-import responses.RegisterResponse;
+import responses.*;
 import server.ServerFacade;
+
 
 public class ClientTests {
 
@@ -15,14 +12,12 @@ public class ClientTests {
     private static final String testUsername = "john";
     private static final String testPassword = "sltw316";
     private static final String testEmail = "beloved@patmos.com";
-
-    @BeforeAll
-    public static void initialize() {
-        facade = new ServerFacade(serverUrl);
-    }
+    private static final String testGameName_1 = "gospel";
+    private static final String testGameName_2 = "revelation";
 
     @BeforeEach
-    public void clearDatabase() {
+    public void initializeAndClear() {
+        facade = new ServerFacade(serverUrl);
         facade.clear();
     }
 
@@ -79,6 +74,21 @@ public class ClientTests {
         facade.register(testUsername, testPassword, testEmail);
         String token = "fake_token";
         LogoutResponse response = facade.logout(token);
+        Assertions.assertNotNull(response.getMessage(), "Failure response does not contain a message");
+    }
+
+    @Test
+    public void createGameSuccess() {
+        String authToken = facade.register(testUsername, testPassword, testEmail).getAuthToken();
+        CreateGameResponse response = facade.createGame(authToken, testGameName_1);
+        Assertions.assertEquals(1, response.getGameID(), "Success response does not contain a game id of 1. Game id should equal 1 because it is the first game in the database.");
+        Assertions.assertNull(response.getMessage(), "Success response contains a message.");
+    }
+
+    @Test
+    public void createGameFail() {
+        CreateGameResponse response = facade.createGame(null, testGameName_1);
+        Assertions.assertNull(response.getGameID(), "Failure response contains a game id");
         Assertions.assertNotNull(response.getMessage(), "Failure response does not contain a message");
     }
 

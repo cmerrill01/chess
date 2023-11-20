@@ -2,8 +2,8 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import requests.CreateGameRequest;
 import requests.LoginRequest;
-import requests.LogoutRequest;
 import requests.RegisterRequest;
 import responses.*;
 
@@ -65,11 +65,17 @@ public class ServerFacade {
         return null;
     }
 
-    public CreateGameResponse createGame(String gameName) {
-        return null;
+    public CreateGameResponse createGame(String authToken, String gameName) {
+        String path = "/game";
+        CreateGameRequest request = new CreateGameRequest(gameName);
+        try {
+            return makeRequest("POST", path, request, authToken, CreateGameResponse.class);
+        } catch (ResponseException e) {
+            return new CreateGameResponse(e.getMessage());
+        }
     }
 
-    public JoinGameResponse joinGame(ChessGame.TeamColor playerColor, int gameId) {
+    public JoinGameResponse joinGame(String authToken, ChessGame.TeamColor playerColor, int gameId) {
         return null;
     }
 
@@ -81,8 +87,8 @@ public class ServerFacade {
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
-            writeBody(request, http);
             writeAuthHeader(authToken, http);
+            writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
@@ -108,8 +114,6 @@ public class ServerFacade {
         }
     }
 
-
-
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
@@ -131,6 +135,7 @@ public class ServerFacade {
                 }
             }
         }
+        http.disconnect();
         return response;
     }
 
