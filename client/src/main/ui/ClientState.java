@@ -2,5 +2,7 @@ package ui;
 
 public enum ClientState {
     LOGGEDIN,
-    LOGGEDOUT
+    LOGGEDOUT,
+    WHITE,
+    BLACK
 }
