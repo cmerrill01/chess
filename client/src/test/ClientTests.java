@@ -1,10 +1,12 @@
+import chess.ChessGame;
+import models.Game;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import responses.*;
 import server.ServerFacade;
 
-import java.util.List;
+import java.util.Set;
 
 
 public class ClientTests {
@@ -117,12 +119,22 @@ public class ClientTests {
 
     @Test
     public void joinGameSuccess() {
-
+        String authToken = facade.register(testUsername, testPassword, testEmail).getAuthToken();
+        int gameId = facade.createGame(authToken, testGameName_1).getGameID();
+        JoinGameResponse response = facade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameId);
+        Set<Game> gameList = facade.listGames(authToken).getGamesList();
+        Assertions.assertNull(response.getMessage(), "Success response contains a message");
+        Assertions.assertEquals(testUsername, gameList.iterator().next().getWhiteUsername(), "Game retrieved from database does not have the correct white username");
     }
 
     @Test
     public void joinGameFail() {
-
+        String authToken = facade.register(testUsername, testPassword, testEmail).getAuthToken();
+        int gameId = facade.createGame(authToken, testGameName_1).getGameID();
+        facade.logout(authToken);
+        JoinGameResponse response = facade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameId);
+        Assertions.assertNotNull(response.getMessage(), "Failure response does not contain a message");
+        authToken = facade.login(testUsername, testPassword).getAuthToken();
+        Assertions.assertNull(facade.listGames(authToken).getGamesList().iterator().next().getWhiteUsername(), "Game retrieved from database includes a white username");
     }
-
 }

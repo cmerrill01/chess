@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import deserializers.ChessGameAdapter;
 import requests.CreateGameRequest;
+import requests.JoinGameRequest;
 import requests.LoginRequest;
 import requests.RegisterRequest;
 import responses.*;
@@ -83,7 +84,13 @@ public class ServerFacade {
     }
 
     public JoinGameResponse joinGame(String authToken, ChessGame.TeamColor playerColor, int gameId) {
-        return null;
+        String path = "/game";
+        JoinGameRequest request = new JoinGameRequest(gameId, playerColor);
+        try {
+            return makeRequest("PUT", path, request, authToken, JoinGameResponse.class);
+        } catch (ResponseException e) {
+            return new JoinGameResponse(e.getMessage());
+        }
     }
 
     private <T> T makeRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws ResponseException {
@@ -115,7 +122,7 @@ public class ServerFacade {
         }
     }
 
-    private static void writeAuthHeader(String authToken, HttpURLConnection http) throws IOException {
+    private static void writeAuthHeader(String authToken, HttpURLConnection http) {
         if (authToken != null) {
             http.addRequestProperty("Authorization", authToken);
         }
