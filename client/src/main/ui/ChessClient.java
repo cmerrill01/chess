@@ -1,11 +1,11 @@
 package ui;
 
-import responses.LoginResponse;
-import responses.RegisterResponse;
+import chess.ChessGame;
+import models.Game;
+import responses.*;
 import server.ResponseException;
 import server.ServerFacade;
 
-import java.lang.module.ResolutionException;
 import java.util.Arrays;
 
 public class ChessClient {
@@ -73,20 +73,66 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <username> <password> <email>");
     }
 
-    public String logout() {
-        return null;
+    public String logout() throws ResponseException {
+        assertLoggedIn();
+        LogoutResponse response = facade.logout(authToken);
+        if (response.getMessage() == null) {
+            state = ClientState.LOGGEDOUT;
+            authToken = null;
+            return "Successfully logged out.";
+        } else {
+            return String.format("Error: %s", response.getMessage());
+        }
     }
 
-    public String createGame(String... params) {
-        return null;
+    public String createGame(String... params) throws ResponseException {
+        assertLoggedIn();
+        if (params.length == 1) {
+            String gameName = params[0];
+            CreateGameResponse response = facade.createGame(authToken, gameName);
+            if (response.getGameID() != null) {
+                return String.format("Successfully created game with id: %d", response.getGameID());
+            } else {
+                return String.format("Error: %s", response.getMessage());
+            }
+        }
+        throw new ResponseException(400, "Expected: <game_name>");
     }
 
-    public String listGames() {
-        return null;
+    public String listGames() throws ResponseException {
+        assertLoggedIn();
+        ListGamesResponse response = facade.listGames(authToken);
+        if (response.getMessage() == null) {
+            StringBuilder gamesList = new StringBuilder();
+            for (Game game : response.getGamesList()) {
+                gamesList.append(String.format("%n  Game ID: %d; White Username: %s; Black Username: %s; Game Name: %s",
+                        game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName()));
+            }
+            return String.format("Games list: %s", gamesList);
+        } else {
+            return String.format("Error: %s", response.getMessage());
+        }
     }
 
-    public String joinGame(String... params) {
-        return null;
+    public String joinGame(String... params) throws ResponseException {
+        assertLoggedIn();
+        if (params.length == 2) {
+            int gameId = Integer.parseInt(params[0]);
+            ChessGame.TeamColor teamColor;
+            switch (params[1]) {
+                case "white" -> teamColor = ChessGame.TeamColor.WHITE;
+                case "black" -> teamColor = ChessGame.TeamColor.BLACK;
+                default -> throw new ResponseException(400, "Expected: <game_id> <WHITE|BLACK>");
+            }
+            JoinGameResponse response = facade.joinGame(authToken, teamColor, gameId);
+            if (response.getMessage() == null) {
+                return String.format("Successfully joined game with id: %d as the %s player.",
+                        gameId, teamColor.toString().toLowerCase());
+            } else {
+                return String.format("Error: %s", response.getMessage());
+            }
+        }
+        throw new ResponseException(400, "Expected: <game_id> <WHITE|BLACK>");
     }
 
     public String observeGame(String... params) {
@@ -110,6 +156,12 @@ public class ChessClient {
                 - join <game_id> <WHITE|BLACK>
                 - observe <game_id>
                 """;
+    }
+
+    private void assertLoggedIn() throws ResponseException {
+        if (state == ClientState.LOGGEDOUT) {
+            throw new ResponseException(400, "Please log in.");
+        }
     }
 
 }
