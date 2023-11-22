@@ -11,7 +11,8 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("Welcome to chess.");
+        System.out.printf(EscapeSequences.RESET_BG_COLOR);
+        System.out.println("Welcome to Chess!");
         System.out.print(client.help());
 
         Scanner scanner = new Scanner(System.in);
@@ -21,13 +22,13 @@ public class Repl {
             String line = scanner.nextLine();
 
             result = client.evaluate(line);
-            System.out.print(result);
+            System.out.printf(result);
         }
         System.out.println();
     }
 
     private void printPrompt() {
-        System.out.print("\n" + ">>> ");
+        System.out.printf(EscapeSequences.RESET_BG_COLOR + "\n" + ">>> ");
     }
 
 }
