@@ -11,7 +11,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.printf(EscapeSequences.RESET_BG_COLOR);
+        System.out.printf(EscapeSequences.RESET_BG_COLOR + EscapeSequences.SET_TEXT_COLOR_WHITE);
         System.out.println("Welcome to Chess!");
         System.out.print(client.help());
 
@@ -28,7 +28,7 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.printf(EscapeSequences.RESET_BG_COLOR + "\n" + ">>> ");
+        System.out.printf(EscapeSequences.SET_TEXT_COLOR_WHITE + EscapeSequences.RESET_BG_COLOR + "\n" + ">>> ");
     }
 
 }
