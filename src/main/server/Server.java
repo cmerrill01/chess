@@ -6,6 +6,7 @@ import dataAccess.DataAccessException;
 import dataAccess.Database;
 import requests.*;
 import responses.*;
+import server.websocket.WebSocketHandler;
 import services.*;
 import spark.*;
 
@@ -13,8 +14,8 @@ import java.util.Objects;
 
 
 public class Server {
-
     private final Database db = new Database();
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler(db);
 
     public static void main(String[] args) {
         new Server().run();
@@ -25,6 +26,8 @@ public class Server {
         Spark.port(8080);
 
         Spark.externalStaticFileLocation("web");
+
+        Spark.webSocket("/connect", webSocketHandler);
 
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
