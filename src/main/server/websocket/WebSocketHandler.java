@@ -53,8 +53,17 @@ public class WebSocketHandler {
         AuthDAO authAccess = new AuthDAO(db);
 
         try {
+            if (gameAccess.findGame(gameID) == null) {
+                ErrorMessage messageToRoot = new ErrorMessage("Error: The game the user requested to join does not exist.");
+                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                return;
+            }
 
-
+            if (authAccess.findAuthToken(authToken) == null) {
+                ErrorMessage messageToRoot = new ErrorMessage("Error: The user does not have a valid authentication token.");
+                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                return;
+            }
 
             if (playerColor == ChessGame.TeamColor.WHITE) {
                 if (!Objects.equals(gameAccess.findGame(gameID).getWhiteUsername(), authAccess.findAuthToken(authToken).username())) {
