@@ -53,31 +53,9 @@ public class WebSocketHandler {
         AuthDAO authAccess = new AuthDAO(db);
 
         try {
-            if (gameAccess.findGame(gameID) == null) {
-                ErrorMessage messageToRoot = new ErrorMessage("Error: The game the user requested to join does not exist.");
-                session.getRemote().sendString(new Gson().toJson(messageToRoot));
-                return;
-            }
-
-            if (authAccess.findAuthToken(authToken) == null) {
-                ErrorMessage messageToRoot = new ErrorMessage("Error: The user does not have a valid authentication token.");
-                session.getRemote().sendString(new Gson().toJson(messageToRoot));
-                return;
-            }
-
-            if (playerColor == ChessGame.TeamColor.WHITE) {
-                if (!Objects.equals(gameAccess.findGame(gameID).getWhiteUsername(), authAccess.findAuthToken(authToken).username())) {
-                    ErrorMessage messageToRoot = new ErrorMessage("Error: The white spot has not been reserved for this player.");
-                    session.getRemote().sendString(new Gson().toJson(messageToRoot));
-                    return;
-                }
-            } else if (playerColor == ChessGame.TeamColor.BLACK) {
-                if (!Objects.equals(gameAccess.findGame(gameID).getBlackUsername(), authAccess.findAuthToken(authToken).username())) {
-                    ErrorMessage messageToRoot = new ErrorMessage("Error: The black spot has not been reserved for this player.");
-                    session.getRemote().sendString(new Gson().toJson(messageToRoot));
-                    return;
-                }
-            }
+            if (invalidGameId(gameID, session, gameAccess)) return;
+            if (invalidAuthToken(authToken, session, authAccess)) return;
+            if (spotNotReserved(authToken, gameID, playerColor, session, gameAccess, authAccess)) return;
         } catch (DataAccessException e) {
             ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
             session.getRemote().sendString(new Gson().toJson(messageToRoot));
@@ -107,7 +85,40 @@ public class WebSocketHandler {
         }
     }
 
-    private void joinObserver(String authToken, int gameID, Session session) {
+    private void joinObserver(String authToken, int gameID, Session session) throws IOException {
+        GameDAO gameAccess = new GameDAO(db);
+        AuthDAO authAccess = new AuthDAO(db);
+
+        try {
+            if (invalidGameId(gameID, session, gameAccess)) return;
+            if (invalidAuthToken(authToken, session, authAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            return;
+        }
+
+        try {
+            connections.add(authToken, gameID, null, session);
+        } catch (IOException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            return;
+        }
+
+        try {
+            ChessGame game = gameAccess.findGame(gameID).getGame();
+            LoadGameMessage messageToRoot = new LoadGameMessage(game);
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+
+            String username = authAccess.findAuthToken(authToken).username();
+            String othersMessageString = String.format("%s joined the game as an observer.", username);
+            NotificationMessage messageToOthers = new NotificationMessage(othersMessageString);
+            connections.broadcast(authToken, gameID, messageToOthers);
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+        }
 
     }
 
@@ -121,6 +132,41 @@ public class WebSocketHandler {
 
     private void resign(String authToken, int gameID) {
 
+    }
+
+    private static boolean spotNotReserved(String authToken, int gameID, ChessGame.TeamColor playerColor, Session session, GameDAO gameAccess, AuthDAO authAccess) throws DataAccessException, IOException {
+        if (playerColor == ChessGame.TeamColor.WHITE) {
+            if (!Objects.equals(gameAccess.findGame(gameID).getWhiteUsername(), authAccess.findAuthToken(authToken).username())) {
+                ErrorMessage messageToRoot = new ErrorMessage("Error: The white spot has not been reserved for this player.");
+                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                return true;
+            }
+        } else if (playerColor == ChessGame.TeamColor.BLACK) {
+            if (!Objects.equals(gameAccess.findGame(gameID).getBlackUsername(), authAccess.findAuthToken(authToken).username())) {
+                ErrorMessage messageToRoot = new ErrorMessage("Error: The black spot has not been reserved for this player.");
+                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean invalidAuthToken(String authToken, Session session, AuthDAO authAccess) throws DataAccessException, IOException {
+        if (authAccess.findAuthToken(authToken) == null) {
+            ErrorMessage messageToRoot = new ErrorMessage("Error: The user does not have a valid authentication token.");
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean invalidGameId(int gameID, Session session, GameDAO gameAccess) throws DataAccessException, IOException {
+        if (gameAccess.findGame(gameID) == null) {
+            ErrorMessage messageToRoot = new ErrorMessage("Error: The game the user requested to join does not exist.");
+            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            return true;
+        }
+        return false;
     }
 
 }
