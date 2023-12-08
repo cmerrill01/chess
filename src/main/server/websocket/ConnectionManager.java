@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String authToken, int gameId, ChessGame.TeamColor playerColor, Session session) {
+    public void add(String authToken, int gameId, ChessGame.TeamColor playerColor, Session session) throws IOException {
+        if (connections.containsKey(authToken)) throw new IOException("Error: User already has an open connection.");
         Connection connection;
         if (playerColor == null) {
             connection = new Connection(authToken, gameId, session);

@@ -32,4 +32,8 @@ public class Connection {
     public int getGameId() {
         return gameId;
     }
+
+    public ChessGame.TeamColor getPlayerColor() {
+        return playerColor;
+    }
 }
