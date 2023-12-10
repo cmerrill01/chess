@@ -2,11 +2,14 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import daos.AuthDAO;
 import daos.GameDAO;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import deserializers.ChessMoveAdapter;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -37,7 +40,9 @@ public class WebSocketHandler {
             var command = new Gson().fromJson(message, JoinObserverCommand.class);
             joinObserver(command.getAuthString(), command.getGameID(), session);
         } else if (message.toLowerCase().contains("make_move")) {
-            var command = new Gson().fromJson(message, MakeMoveCommand.class);
+            GsonBuilder builder = new GsonBuilder();
+            builder.registerTypeAdapter(ChessMove.class, new ChessMoveAdapter());
+            var command = builder.create().fromJson(message, MakeMoveCommand.class);
             makeMove(command.getAuthString(), command.getGameID(), command.getMove());
         } else if (message.toLowerCase().contains("leave")) {
             var command = new Gson().fromJson(message, LeaveCommand.class);
@@ -53,16 +58,6 @@ public class WebSocketHandler {
         AuthDAO authAccess = new AuthDAO(db);
 
         try {
-            if (invalidGameId(gameID, session, gameAccess)) return;
-            if (invalidAuthToken(authToken, session, authAccess)) return;
-            if (spotNotReserved(authToken, gameID, playerColor, session, gameAccess, authAccess)) return;
-        } catch (DataAccessException e) {
-            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
-            return;
-        }
-
-        try {
             connections.add(authToken, gameID, playerColor, session);
         } catch (IOException e) {
             ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
@@ -71,9 +66,19 @@ public class WebSocketHandler {
         }
 
         try {
+            if (invalidGameId(authToken, gameID, gameAccess)) return;
+            if (invalidAuthToken(authToken, authAccess)) return;
+            if (spotNotReserved(authToken, gameID, playerColor, gameAccess, authAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+            return;
+        }
+
+        try {
             ChessGame game = gameAccess.findGame(gameID).getGame();
             LoadGameMessage messageToRoot = new LoadGameMessage(game);
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            connections.send(authToken, messageToRoot);
 
             String username = authAccess.findAuthToken(authToken).username();
             String othersMessageString = String.format("%s joined the game as the %s player.", username, playerColor.toString().toLowerCase());
@@ -90,15 +95,6 @@ public class WebSocketHandler {
         AuthDAO authAccess = new AuthDAO(db);
 
         try {
-            if (invalidGameId(gameID, session, gameAccess)) return;
-            if (invalidAuthToken(authToken, session, authAccess)) return;
-        } catch (DataAccessException e) {
-            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
-            return;
-        }
-
-        try {
             connections.add(authToken, gameID, null, session);
         } catch (IOException e) {
             ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
@@ -107,9 +103,18 @@ public class WebSocketHandler {
         }
 
         try {
+            if (invalidGameId(authToken, gameID, gameAccess)) return;
+            if (invalidAuthToken(authToken, authAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+            return;
+        }
+
+        try {
             ChessGame game = gameAccess.findGame(gameID).getGame();
             LoadGameMessage messageToRoot = new LoadGameMessage(game);
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            connections.send(authToken, messageToRoot);
 
             String username = authAccess.findAuthToken(authToken).username();
             String othersMessageString = String.format("%s joined the game as an observer.", username);
@@ -122,10 +127,39 @@ public class WebSocketHandler {
 
     }
 
-    private void makeMove(String authToken, int gameID, ChessMove move) {
+    private void makeMove(String authToken, int gameID, ChessMove move) throws IOException {
+        GameDAO gameAccess = new GameDAO(db);
+        AuthDAO authAccess = new AuthDAO(db);
 
+        try {
+            if (invalidGameId(authToken, gameID, gameAccess)) return;
+            if (invalidAuthToken(authToken, authAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+            return;
+        }
+
+        try {
+            // Get the game
+            ChessGame game = gameAccess.findGame(gameID).getGame();
+            // Make the move
+            game.makeMove(move);
+            // Update the game
+            gameAccess.updateGame(gameID, game);
+            // Load the board for all players
+            LoadGameMessage messageToAll = new LoadGameMessage(game);
+            connections.broadcast(null, gameID, messageToAll);
+            // Notify other players that a move was made
+            NotificationMessage messageToOthers = new NotificationMessage(String.format(
+                    "%s has made a move: %s", authAccess.findAuthToken(authToken).username(), move.toString())
+            );
+            connections.broadcast(authToken, gameID, messageToOthers);
+        } catch (DataAccessException | InvalidMoveException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+        }
     }
-
     private void leave(String authToken, int gameID) {
 
     }
@@ -134,36 +168,36 @@ public class WebSocketHandler {
 
     }
 
-    private static boolean spotNotReserved(String authToken, int gameID, ChessGame.TeamColor playerColor, Session session, GameDAO gameAccess, AuthDAO authAccess) throws DataAccessException, IOException {
+    private boolean spotNotReserved(String authToken, int gameID, ChessGame.TeamColor playerColor, GameDAO gameAccess, AuthDAO authAccess) throws DataAccessException, IOException {
         if (playerColor == ChessGame.TeamColor.WHITE) {
             if (!Objects.equals(gameAccess.findGame(gameID).getWhiteUsername(), authAccess.findAuthToken(authToken).username())) {
                 ErrorMessage messageToRoot = new ErrorMessage("Error: The white spot has not been reserved for this player.");
-                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                connections.send(authToken, messageToRoot);
                 return true;
             }
         } else if (playerColor == ChessGame.TeamColor.BLACK) {
             if (!Objects.equals(gameAccess.findGame(gameID).getBlackUsername(), authAccess.findAuthToken(authToken).username())) {
                 ErrorMessage messageToRoot = new ErrorMessage("Error: The black spot has not been reserved for this player.");
-                session.getRemote().sendString(new Gson().toJson(messageToRoot));
+                connections.send(authToken, messageToRoot);
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean invalidAuthToken(String authToken, Session session, AuthDAO authAccess) throws DataAccessException, IOException {
+    private boolean invalidAuthToken(String authToken, AuthDAO authAccess) throws DataAccessException, IOException {
         if (authAccess.findAuthToken(authToken) == null) {
             ErrorMessage messageToRoot = new ErrorMessage("Error: The user does not have a valid authentication token.");
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            connections.send(authToken, messageToRoot);
             return true;
         }
         return false;
     }
 
-    private static boolean invalidGameId(int gameID, Session session, GameDAO gameAccess) throws DataAccessException, IOException {
+    private boolean invalidGameId(String authToken, int gameID, GameDAO gameAccess) throws DataAccessException, IOException {
         if (gameAccess.findGame(gameID) == null) {
             ErrorMessage messageToRoot = new ErrorMessage("Error: The game the user requested to join does not exist.");
-            session.getRemote().sendString(new Gson().toJson(messageToRoot));
+            connections.send(authToken, messageToRoot);
             return true;
         }
         return false;
