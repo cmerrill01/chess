@@ -7,18 +7,25 @@ import models.Game;
 import responses.*;
 import server.ResponseException;
 import server.ServerFacade;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
 import java.util.Arrays;
 
 public class ChessClient {
 
     private final ServerFacade facade;
+    private WebSocketFacade ws;
+    private final NotificationHandler notificationHandler;
+    private final String serverUrl;
     private ClientState state = ClientState.LOGGEDOUT;
     private String authToken;
     private final ChessGame demoGame = new ChessGameImpl();
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         facade = new ServerFacade(serverUrl);
+        this.notificationHandler = notificationHandler;
+        this.serverUrl = serverUrl;
         demoGame.setBoard(new ChessBoardImpl());
         demoGame.getBoard().resetBoard();
     }
@@ -133,6 +140,8 @@ public class ChessClient {
             }
             JoinGameResponse response = facade.joinGame(authToken, teamColor, gameId);
             if (response.getMessage() == null) {
+                ws = new WebSocketFacade(serverUrl, notificationHandler);
+
                 return String.format("Successfully joined game with id: %d as the %s player.%n%n%s",
                         gameId, teamColor.toString().toLowerCase(), displayBoard(demoGame));
             } else {

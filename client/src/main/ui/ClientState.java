@@ -4,5 +4,6 @@ public enum ClientState {
     LOGGEDIN,
     LOGGEDOUT,
     WHITE,
-    BLACK
+    BLACK,
+    OBSERVER
 }
