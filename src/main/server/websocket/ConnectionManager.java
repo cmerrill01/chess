@@ -48,4 +48,8 @@ public class ConnectionManager {
     public void send(String authToken, ServerMessage serverMessage) throws IOException {
         connections.get(authToken).send(new Gson().toJson(serverMessage));
     }
+
+    public ChessGame.TeamColor getPlayerColor(String authToken) {
+        return connections.get(authToken).getPlayerColor();
+    }
 }

@@ -10,6 +10,13 @@ import java.util.Collection;
  */
 public interface ChessGame {
 
+    public enum GameStatus {
+        UNDECIDED,
+        WHITE_VICTORY,
+        BLACK_VICTORY,
+        DRAW
+    }
+
     /**
      * @return Which team's turn it is
      */
@@ -72,6 +79,8 @@ public interface ChessGame {
      */
     boolean isInStalemate(TeamColor teamColor);
 
+    void resignPlayer(TeamColor playerToResign);
+
     /**
      * Sets this game's chessboard with a given board
      * 
@@ -85,4 +94,6 @@ public interface ChessGame {
      * @return the chessboard
      */
     ChessBoard getBoard();
+
+    GameStatus getStatus();
 }

@@ -134,6 +134,7 @@ public class WebSocketHandler {
         try {
             if (invalidGameId(authToken, gameID, gameAccess)) return;
             if (invalidAuthToken(authToken, authAccess)) return;
+            if (gameOver(authToken, gameID, gameAccess)) return;
         } catch (DataAccessException e) {
             ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
             connections.send(authToken, messageToRoot);
@@ -143,29 +144,65 @@ public class WebSocketHandler {
         try {
             // Get the game
             ChessGame game = gameAccess.findGame(gameID).getGame();
-            // Make the move
-            game.makeMove(move);
-            // Update the game
-            gameAccess.updateGame(gameID, game);
-            // Load the board for all players
-            LoadGameMessage messageToAll = new LoadGameMessage(game);
-            connections.broadcast(null, gameID, messageToAll);
-            // Notify other players that a move was made
-            NotificationMessage messageToOthers = new NotificationMessage(String.format(
-                    "%s has made a move: %s", authAccess.findAuthToken(authToken).username(), move.toString())
-            );
-            connections.broadcast(authToken, gameID, messageToOthers);
+            // Ensure it's this players turn before allowing them to make a move
+            if (game.getTeamTurn() == connections.getPlayerColor(authToken)) {
+                // Make the move
+                game.makeMove(move);
+                // Update the game
+                gameAccess.updateGame(gameID, game);
+                // Load the board for all players
+                LoadGameMessage messageToAll = new LoadGameMessage(game);
+                connections.broadcast(null, gameID, messageToAll);
+                // Notify other players that a move was made
+                NotificationMessage messageToOthers = new NotificationMessage(String.format(
+                        "%s has made a move: %s", authAccess.findAuthToken(authToken).username(), move.toString())
+                );
+                connections.broadcast(authToken, gameID, messageToOthers);
+            } else {
+                ErrorMessage messageToRoot = new ErrorMessage("Error: Illegal move attempt; not this user's turn.");
+                connections.send(authToken, messageToRoot);
+            }
         } catch (DataAccessException | InvalidMoveException e) {
             ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
             connections.send(authToken, messageToRoot);
         }
     }
+
     private void leave(String authToken, int gameID) {
 
     }
 
-    private void resign(String authToken, int gameID) {
+    private void resign(String authToken, int gameID) throws IOException {
+        GameDAO gameAccess = new GameDAO(db);
+        AuthDAO authAccess = new AuthDAO(db);
 
+        try {
+            if (invalidGameId(authToken, gameID, gameAccess)) return;
+            if (invalidAuthToken(authToken, authAccess)) return;
+            if (playerIsObserver(authToken)) return;
+            if (gameOver(authToken, gameID, gameAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+            return;
+        }
+
+        try {
+            // Get the game
+            ChessGame game = gameAccess.findGame(gameID).getGame();
+            // Resign the player
+            game.resignPlayer(connections.getPlayerColor(authToken));
+            // Update the game
+            gameAccess.updateGame(gameID, game);
+            // Notify all players
+            NotificationMessage messageToAll = new NotificationMessage(String.format(
+                    "%s has resigned.", authAccess.findAuthToken(authToken).username()
+            ));
+            connections.broadcast(null, gameID, messageToAll);
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+        }
     }
 
     private boolean spotNotReserved(String authToken, int gameID, ChessGame.TeamColor playerColor, GameDAO gameAccess, AuthDAO authAccess) throws DataAccessException, IOException {
@@ -203,4 +240,21 @@ public class WebSocketHandler {
         return false;
     }
 
+    private boolean gameOver(String authToken, int gameID, GameDAO gameAccess) throws DataAccessException, IOException {
+        if (gameAccess.findGame(gameID).getGame().getStatus() != ChessGame.GameStatus.UNDECIDED) {
+            ErrorMessage messageToRoot = new ErrorMessage("Error: This game is over and no moves can be made.");
+            connections.send(authToken, messageToRoot);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean playerIsObserver(String authToken) throws IOException {
+        if (connections.getPlayerColor(authToken) == null) {
+            ErrorMessage messageToRoot = new ErrorMessage("Error: This user is an observer and cannot perform this action.");
+            connections.send(authToken, messageToRoot);
+            return true;
+        }
+        return false;
+    }
 }

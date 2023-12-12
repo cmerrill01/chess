@@ -1,5 +1,7 @@
 package chess;
 
+import models.Game;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -8,11 +10,13 @@ public class ChessGameImpl implements ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard board;
+    private GameStatus status;
 
     public ChessGameImpl() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoardImpl();
         board.resetBoard();
+        status = GameStatus.UNDECIDED;
     }
 
     @Override
@@ -27,6 +31,7 @@ public class ChessGameImpl implements ChessGame {
 
     @Override
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        if (status != GameStatus.UNDECIDED) return null;
         if (board.getPiece(startPosition) != null) {
             Collection<ChessMove> possibleMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
             Collection<ChessMove> validMoves = new HashSet<>();
@@ -77,10 +82,18 @@ public class ChessGameImpl implements ChessGame {
         board.movePiece(move);
 
         // switch to the other team's turn
+        // if the team is in checkmate, declare victory
         switch (teamTurn) {
-            case WHITE -> teamTurn = TeamColor.BLACK;
-            case BLACK -> teamTurn = TeamColor.WHITE;
+            case WHITE -> {
+                teamTurn = TeamColor.BLACK;
+                if (isInCheckmate(teamTurn)) status = GameStatus.WHITE_VICTORY;
+            }
+            case BLACK -> {
+                teamTurn = TeamColor.WHITE;
+                if (isInCheckmate(teamTurn)) status = GameStatus.BLACK_VICTORY;
+            }
         }
+        if (isInStalemate(teamTurn)) status = GameStatus.DRAW;
     }
 
     @Override
@@ -237,6 +250,16 @@ public class ChessGameImpl implements ChessGame {
     }
 
     @Override
+    public void resignPlayer(TeamColor playerToResign) {
+        if (status == GameStatus.UNDECIDED) {
+            switch (playerToResign) {
+                case WHITE -> status = GameStatus.BLACK_VICTORY;
+                case BLACK -> status = GameStatus.WHITE_VICTORY;
+            }
+        }
+    }
+
+    @Override
     public void setBoard(ChessBoard board) {
         this.board = board;
     }
@@ -244,6 +267,11 @@ public class ChessGameImpl implements ChessGame {
     @Override
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public GameStatus getStatus() {
+        return status;
     }
 
     @Override
