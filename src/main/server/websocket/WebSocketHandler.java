@@ -168,7 +168,31 @@ public class WebSocketHandler {
         }
     }
 
-    private void leave(String authToken, int gameID) {
+    private void leave(String authToken, int gameID) throws IOException {
+        GameDAO gameAccess = new GameDAO(db);
+        AuthDAO authAccess = new AuthDAO(db);
+
+        try {
+            if (invalidGameId(authToken, gameID, gameAccess)) return;
+            if (invalidAuthToken(authToken, authAccess)) return;
+        } catch (DataAccessException e) {
+            ErrorMessage messageToRoot = new ErrorMessage(e.getMessage());
+            connections.send(authToken, messageToRoot);
+            return;
+        }
+
+        try {
+            String username = authAccess.findAuthToken(authToken).username();
+            // Game is updated in the database.
+            gameAccess.leaveGame(username, gameID, connections.getPlayerColor(authToken));
+            // Game is updated to remove the root client.
+            connections.remove(authToken);
+            // Server sends a Notification message to all other clients in that game informing them that the root client left. This applies to both players and observers.
+            NotificationMessage messageToOthers = new NotificationMessage(String.format("%s left the game.", username));
+            connections.broadcast(null, gameID, messageToOthers);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

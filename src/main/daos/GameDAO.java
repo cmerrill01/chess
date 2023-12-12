@@ -188,6 +188,64 @@ public class GameDAO {
         }
     }
 
+    public void leaveGame(String username, int gameId, ChessGame.TeamColor teamColor) throws DataAccessException {
+        try (Connection conn = db.getConnection()) {
+            if (teamColor == ChessGame.TeamColor.WHITE) {
+                try (var preparedQuery = conn.prepareStatement("""
+                        SELECT white_username
+                        FROM games
+                        WHERE game_id = ?;
+                        """)) {
+                    preparedQuery.setInt(1, gameId);
+                    try (var result = preparedQuery.executeQuery()) {
+                        if (result.next()) {
+                            if (Objects.equals(result.getString("white_username"), username)) {
+                                try (var preparedUpdate = conn.prepareStatement("""
+                                        UPDATE games
+                                        SET white_username = NULL
+                                        WHERE game_id = ?;
+                                        """)) {
+                                    preparedUpdate.setInt(1, gameId);
+
+                                    preparedUpdate.executeUpdate();
+                                }
+                            } else {
+                                throw new DataAccessException("Error: This user does not have this spot in the queried game.");
+                            }
+                        }
+                    }
+                }
+            } else if (teamColor == ChessGame.TeamColor.BLACK) {
+                try (var preparedQuery = conn.prepareStatement("""
+                        SELECT black_username
+                        FROM games
+                        WHERE game_id = ?;
+                        """)) {
+                    preparedQuery.setInt(1, gameId);
+                    try (var result = preparedQuery.executeQuery()) {
+                        if (result.next()) {
+                            if (Objects.equals(result.getString("black_username"), username)) {
+                                try (var preparedUpdate = conn.prepareStatement("""
+                                        UPDATE games
+                                        SET black_username = NULL
+                                        WHERE game_id = ?;
+                                        """)) {
+                                    preparedUpdate.setInt(1, gameId);
+
+                                    preparedUpdate.executeUpdate();
+                                }
+                            } else {
+                                throw new DataAccessException("Error: This user does not have this spot in the queried game.");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
     /**
      * update the data for a game in the database
      * @param gameIdToUpdate the unique id # of the game to be updated
