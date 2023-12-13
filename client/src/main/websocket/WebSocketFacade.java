@@ -9,8 +9,7 @@ import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserverCommand;
-import webSocketMessages.userCommands.JoinPlayerCommand;
+import webSocketMessages.userCommands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -22,6 +21,7 @@ public class WebSocketFacade extends Endpoint {
     private final Session session;
     private final NotificationHandler notificationHandler;
     private final String authToken;
+    private Integer gameID;
 
     public WebSocketFacade(String url, NotificationHandler notificationHandler, String authToken) throws ResponseException {
         try {
@@ -50,6 +50,7 @@ public class WebSocketFacade extends Endpoint {
             });
 
             this.authToken = authToken;
+            this.gameID = null;
         } catch (URISyntaxException | DeploymentException | IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
@@ -64,6 +65,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new JoinPlayerCommand(authToken, gameID, playerColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.gameID = gameID;
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
@@ -73,6 +75,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new JoinObserverCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.gameID = gameID;
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
@@ -86,16 +89,27 @@ public class WebSocketFacade extends Endpoint {
 
     }
 
-    public void leave(int gameID) throws ResponseException {
-
+    public void leave() throws ResponseException {
+        try {
+            var command = new LeaveCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.gameID = null;
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public void makeMove(int gameID, String move) throws ResponseException {
 
     }
 
-    public void resign(int gameID) throws ResponseException {
-
+    public void resign() throws ResponseException {
+        try {
+            var command = new ResignCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public void highlightLegalMoves(String position) throws ResponseException {

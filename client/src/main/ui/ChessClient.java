@@ -11,6 +11,7 @@ import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ChessClient {
 
@@ -94,6 +95,7 @@ public class ChessClient {
 
     public String logout() throws ResponseException {
         assertLoggedIn();
+        if (state == ClientState.WHITE || state == ClientState.BLACK || state == ClientState.OBSERVER) leave();
         LogoutResponse response = facade.logout(authToken);
         if (response.getMessage() == null) {
             state = ClientState.LOGGEDOUT;
@@ -106,6 +108,7 @@ public class ChessClient {
 
     public String createGame(String... params) throws ResponseException {
         assertLoggedIn();
+        assertNotInGame();
         if (params.length == 1) {
             String gameName = params[0];
             CreateGameResponse response = facade.createGame(authToken, gameName);
@@ -120,6 +123,7 @@ public class ChessClient {
 
     public String listGames() throws ResponseException {
         assertLoggedIn();
+        assertNotInGame();
         ListGamesResponse response = facade.listGames(authToken);
         if (response.getMessage() == null) {
             StringBuilder gamesList = new StringBuilder();
@@ -135,6 +139,7 @@ public class ChessClient {
 
     public String joinGame(String... params) throws ResponseException {
         assertLoggedIn();
+        assertNotInGame();
         if (params.length == 2) {
             int gameId = Integer.parseInt(params[0]);
             ChessGame.TeamColor teamColor;
@@ -162,6 +167,7 @@ public class ChessClient {
 
     public String observeGame(String... params) throws ResponseException {
         assertLoggedIn();
+        assertNotInGame();
         if (params.length == 1) {
             int gameId = Integer.parseInt(params[0]);
             JoinGameResponse response = facade.joinGame(authToken, null, gameId);
@@ -182,16 +188,22 @@ public class ChessClient {
         return "TODO: finish implementation of redrawBoard\n";
     }
 
-    public String leave() {
-        return "TODO: finish implementation of leave\n";
+    public String leave() throws ResponseException {
+        assertInGame();
+        ws.leave();
+        ws = null;
+        state = ClientState.LOGGEDIN;
+        return "Successfully left the game.";
     }
 
     public String makeMove(String ... params) {
         return "TODO: finish implementation of makeMove\n";
     }
 
-    public String resign() {
-        return "TODO: finish implementation of resign\n";
+    public String resign() throws ResponseException {
+        assertInGame();
+        ws.resign();
+        return "Successfully resigned.";
     }
 
     public String highlightLegalMoves() {
@@ -201,21 +213,36 @@ public class ChessClient {
     public String help() {
         if (state == ClientState.LOGGEDOUT) {
             return """
-                    - help
-                    - quit
-                    - login <username> <password>
-                    - register <username> <password> <email>""";
-        }
-        return """
+                - help
+                - quit
+                - login <username> <password>
+                - register <username> <password> <email>""";
+        } else if (state == ClientState.LOGGEDIN) {
+            return """
                 - help
                 - logout
                 - create <game_name>
                 - list
                 - join <game_id> <WHITE|BLACK>
                 - observe <game_id>""";
+        } else if (state == ClientState.OBSERVER) {
+            return """
+                - help
+                - redraw (Redraws the chess board)
+                - leave
+                - highlight <piece_position> (e.g., a2) (Highlights legal moves)""";
+        }
+        return """
+                - help
+                - redraw (Redraws the chess board)
+                - leave
+                - move <start_position> <end_position> (e.g., a2 a3)
+                - resign
+                - highlight <piece_position> (e.g., a2) (Highlights legal moves)""";
     }
 
     public String quit() throws ResponseException {
+        if (state == ClientState.WHITE || state == ClientState.BLACK || state == ClientState.OBSERVER) leave();
         if (state != ClientState.LOGGEDOUT) logout();
         return "quit";
     }
@@ -229,6 +256,24 @@ public class ChessClient {
     private void assertLoggedOut() throws ResponseException {
         if (state != ClientState.LOGGEDOUT) {
             throw new ResponseException(400, "Please log out before performing this action.");
+        }
+    }
+
+    private void assertInGame() throws ResponseException {
+        if (!(state == ClientState.WHITE || state == ClientState.BLACK || state == ClientState.OBSERVER)) {
+            throw new ResponseException(400, "Please join a game before performing this action.");
+        }
+    }
+
+    private void assertNotInGame() throws ResponseException {
+        if (state == ClientState.WHITE || state == ClientState.BLACK || state == ClientState.OBSERVER) {
+            throw new ResponseException(400, "Please leave the game before performing this action.");
+        }
+    }
+
+    private void assertPlayer() throws ResponseException {
+        if (!(state == ClientState.WHITE || state == ClientState.BLACK)) {
+            throw new ResponseException(400, "Please join a game as a player before performing this action.");
         }
     }
 
