@@ -13,4 +13,9 @@ public class LoadGameMessage extends ServerMessage {
     public ChessGame getGame() {
         return game;
     }
+
+    @Override
+    public String toString() {
+        return game.toString();
+    }
 }

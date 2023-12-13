@@ -1,5 +1,9 @@
 package ui;
 
+import chess.ChessGame;
+import webSocketMessages.serverMessages.ErrorMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 import websocket.NotificationHandler;
 
@@ -36,7 +40,24 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        System.out.printf(EscapeSequences.SET_TEXT_COLOR_RED + EscapeSequences.RESET_BG_COLOR + notification.toString());
+        switch (notification.getServerMessageType()) {
+            case NOTIFICATION -> {
+                NotificationMessage notificationMessage = (NotificationMessage) notification;
+                System.out.printf(EscapeSequences.SET_TEXT_COLOR_RED + EscapeSequences.RESET_BG_COLOR + notificationMessage.getMessage());
+            }
+            case LOAD_GAME -> {
+                LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
+                if (client.getState() == ClientState.BLACK) {
+                    System.out.print(new ChessBoardDisplay(loadGameMessage.getGame(), ChessGame.TeamColor.BLACK).display());
+                } else {
+                    System.out.print(new ChessBoardDisplay(loadGameMessage.getGame(), ChessGame.TeamColor.WHITE).display());
+                }
+            }
+            case ERROR -> {
+                ErrorMessage errorMessage = (ErrorMessage) notification;
+                System.out.printf(EscapeSequences.SET_TEXT_COLOR_RED + EscapeSequences.RESET_BG_COLOR + errorMessage.getErrorMessage());
+            }
+        }
         printPrompt();
     }
 }

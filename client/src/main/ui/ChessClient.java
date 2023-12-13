@@ -1,8 +1,6 @@
 package ui;
 
-import chess.ChessBoardImpl;
-import chess.ChessGame;
-import chess.ChessGameImpl;
+import chess.*;
 import models.Game;
 import responses.*;
 import server.ResponseException;
@@ -156,8 +154,8 @@ public class ChessClient {
                     case WHITE -> state = ClientState.WHITE;
                     case BLACK -> state = ClientState.BLACK;
                 }
-                return String.format("Successfully joined game with id: %d as the %s player.%n%n%s",
-                        gameId, teamColor.toString().toLowerCase(), displayBoard(demoGame));
+                return String.format("Successfully joined game with id: %d as the %s player.",
+                        gameId, teamColor.toString().toLowerCase());
             } else {
                 return String.format("Error: %s", response.getMessage());
             }
@@ -175,8 +173,7 @@ public class ChessClient {
                 ws = new WebSocketFacade(serverUrl, notificationHandler, authToken);
                 ws.joinObserver(gameId);
                 state = ClientState.OBSERVER;
-                return String.format("Successfully joined game with id: %d as an observer.%n%n%s",
-                        gameId, displayBoard(demoGame));
+                return String.format("Successfully joined game with id: %d as an observer.", gameId);
             } else {
                 return String.format("Error: %s", response.getMessage());
             }
@@ -196,8 +193,20 @@ public class ChessClient {
         return "Successfully left the game.";
     }
 
-    public String makeMove(String ... params) {
-        return "TODO: finish implementation of makeMove\n";
+    public String makeMove(String ... params) throws ResponseException {
+        assertPlayer();
+        if (params.length == 2) {
+            int startCol = params[0].toCharArray()[0] - 'a' + 1;
+            int startRow = params[0].toCharArray()[1] - '0';
+            ChessPosition startPosition = new ChessPositionImpl(startRow, startCol);
+            int toCol = params[1].toCharArray()[0] - 'a' + 1;
+            int toRow = params[1].toCharArray()[1] - '0';
+            ChessPosition toPosition = new ChessPositionImpl(toRow, toCol);
+            ChessMove move = new ChessMoveImpl(startPosition, toPosition);
+            ws.makeMove(move);
+            return String.format("Successfully made move: %s %s", params[0], params[1]);
+        }
+        throw new ResponseException(400, "Expected: <start_position> <end_position> (e.g., a2 a3)");
     }
 
     public String resign() throws ResponseException {

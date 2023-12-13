@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import deserializers.ChessGameAdapter;
@@ -81,14 +82,6 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void help() throws ResponseException {
-
-    }
-
-    public void redrawChessBoard() throws ResponseException {
-
-    }
-
     public void leave() throws ResponseException {
         try {
             var command = new LeaveCommand(authToken, gameID);
@@ -99,8 +92,13 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(int gameID, String move) throws ResponseException {
-
+    public void makeMove(ChessMove move) throws ResponseException {
+        try {
+            var command = new MakeMoveCommand(authToken, gameID, move);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public void resign() throws ResponseException {
@@ -110,10 +108,6 @@ public class WebSocketFacade extends Endpoint {
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
-    }
-
-    public void highlightLegalMoves(String position) throws ResponseException {
-
     }
 
 }
