@@ -3,11 +3,9 @@ package server.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -29,19 +27,12 @@ public class ConnectionManager {
     }
 
     public void broadcast(String excludeAuthToken, int gameId, ServerMessage serverMessage) throws IOException {
-        var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.authToken.equals(excludeAuthToken) && c.getGameId() == gameId) {
                     c.send(new Gson().toJson(serverMessage));
                 }
-            } else {
-                removeList.add(c);
             }
-        }
-
-        for (var c : removeList) {
-            connections.remove(c.authToken);
         }
     }
 

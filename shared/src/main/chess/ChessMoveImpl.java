@@ -81,14 +81,14 @@ public class ChessMoveImpl implements ChessMove {
     @Override
     public String toString() {
         StringBuilder output = new StringBuilder();
-        char startRow = (char) (startPosition.getRow() - 1 + 'a');
-        output.append(startRow);
-        int startCol = startPosition.getColumn();
+        char startCol = (char) ('a' + (8 - startPosition.getColumn()));
         output.append(startCol);
-        char endRow = (char) (endPosition.getRow() - 1 + 'a');
-        output.append(endRow);
-        int endCol = endPosition.getColumn();
+        int startRow = startPosition.getRow();
+        output.append(startRow);
+        char endCol = (char) ('a' + (8 - endPosition.getColumn()));
         output.append(endCol);
+        int endRow = endPosition.getRow();
+        output.append(endRow);
         return output.toString();
     }
 

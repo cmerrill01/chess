@@ -112,10 +112,10 @@ public class ChessBoardDisplay {
         }
     }
 
-    private static void rowLabel(StringBuilder display, int rowNum) {
+    private void rowLabel(StringBuilder display, int rowNum) {
         display.append(EscapeSequences.RESET_BG_COLOR);
         display.append(" ");
-        display.append(rowNum + 1);
+        display.append(game.getBoard().getMaxRow() - rowNum);
         display.append(" ");
     }
 
