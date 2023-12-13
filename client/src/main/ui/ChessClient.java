@@ -9,6 +9,7 @@ import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class ChessClient {
 
@@ -214,8 +215,16 @@ public class ChessClient {
 
     public String resign() throws ResponseException {
         assertInGame();
-        ws.resign();
-        return "Successfully resigned.";
+        System.out.print("""
+                Are you sure you want to resign? Type 'yes' to confirm.
+                RESIGN? >>>\s""");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine().toLowerCase();
+        if (line.equals("yes")) {
+            ws.resign();
+            return "Successfully resigned.";
+        }
+        return "Resignation cancelled.";
     }
 
     public String highlightLegalMoves(String ... params) throws ResponseException {
