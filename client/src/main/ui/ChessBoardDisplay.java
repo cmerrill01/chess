@@ -211,11 +211,29 @@ public class ChessBoardDisplay {
         }
     }
 
-    private static void highlightBoardRowBlack(char[] row, int rowNum, StringBuilder display, Set<ChessPosition> positionsToHighlight) {
+    private void highlightBoardRowBlack(char[] row, int rowNum, StringBuilder display, Set<ChessPosition> positionsToHighlight) {
         int colNum = 0;
         for (char token : row) {
-            if ((rowNum + colNum) % 2 == 0) display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-            else display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            if ((rowNum + colNum) % 2 == 0) {
+                if (positionsToHighlight.contains(new ChessPositionImpl(
+                        game.getBoard().getMaxRow() - rowNum, colNum + 1))
+                ) {
+                    display.append(EscapeSequences.SET_BG_COLOR_GREEN);
+                }
+                else {
+                    display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                }
+            }
+            else {
+                if (positionsToHighlight.contains(new ChessPositionImpl(
+                        game.getBoard().getMaxRow() - rowNum, colNum + 1))
+                ) {
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                }
+                else {
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                }
+            }
             if (Character.isUpperCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_RED);
             else display.append(EscapeSequences.SET_TEXT_COLOR_BLUE);
 
