@@ -44,6 +44,11 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "join" -> joinGame(parameters);
                 case "observe" -> observeGame(parameters);
+                case "redraw" -> redrawBoard();
+                case "leave" -> leave();
+                case "move" -> makeMove(parameters);
+                case "resign" -> resign();
+                case "highlight" -> highlightLegalMoves();
                 default -> help();
             };
         } catch (ResponseException e) {
@@ -140,8 +145,12 @@ public class ChessClient {
             }
             JoinGameResponse response = facade.joinGame(authToken, teamColor, gameId);
             if (response.getMessage() == null) {
-                ws = new WebSocketFacade(serverUrl, notificationHandler);
-
+                ws = new WebSocketFacade(serverUrl, notificationHandler, authToken);
+                ws.joinPlayer(gameId, teamColor);
+                switch (teamColor) {
+                    case WHITE -> state = ClientState.WHITE;
+                    case BLACK -> state = ClientState.BLACK;
+                }
                 return String.format("Successfully joined game with id: %d as the %s player.%n%n%s",
                         gameId, teamColor.toString().toLowerCase(), displayBoard(demoGame));
             } else {
@@ -157,6 +166,9 @@ public class ChessClient {
             int gameId = Integer.parseInt(params[0]);
             JoinGameResponse response = facade.joinGame(authToken, null, gameId);
             if (response.getMessage() == null) {
+                ws = new WebSocketFacade(serverUrl, notificationHandler, authToken);
+                ws.joinObserver(gameId);
+                state = ClientState.OBSERVER;
                 return String.format("Successfully joined game with id: %d as an observer.%n%n%s",
                         gameId, displayBoard(demoGame));
             } else {
@@ -164,6 +176,26 @@ public class ChessClient {
             }
         }
         throw new ResponseException(400, "Expected: <game_id>");
+    }
+
+    public String redrawBoard() {
+        return "TODO: finish implementation of redrawBoard\n";
+    }
+
+    public String leave() {
+        return "TODO: finish implementation of leave\n";
+    }
+
+    public String makeMove(String ... params) {
+        return "TODO: finish implementation of makeMove\n";
+    }
+
+    public String resign() {
+        return "TODO: finish implementation of resign\n";
+    }
+
+    public String highlightLegalMoves() {
+        return "TODO: finish implementation of highlightLegalMoves\n";
     }
 
     public String help() {
@@ -327,5 +359,9 @@ public class ChessClient {
         }
         display.append("   ");
         display.append("\n");
+    }
+
+    public ClientState getState() {
+        return state;
     }
 }

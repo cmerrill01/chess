@@ -31,7 +31,7 @@ public class Repl implements NotificationHandler {
     }
 
     private void printPrompt() {
-        System.out.printf(EscapeSequences.SET_TEXT_COLOR_WHITE + EscapeSequences.RESET_BG_COLOR + "\n" + ">>> ");
+        System.out.printf(EscapeSequences.SET_TEXT_COLOR_WHITE + EscapeSequences.RESET_BG_COLOR + "\n" + client.getState() + " >>> ");
     }
 
     @Override

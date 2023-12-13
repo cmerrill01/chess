@@ -9,6 +9,8 @@ import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinObserverCommand;
+import webSocketMessages.userCommands.JoinPlayerCommand;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -17,10 +19,11 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
-    Session session;
-    NotificationHandler notificationHandler;
+    private final Session session;
+    private final NotificationHandler notificationHandler;
+    private final String authToken;
 
-    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
+    public WebSocketFacade(String url, NotificationHandler notificationHandler, String authToken) throws ResponseException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/connect");
@@ -45,6 +48,8 @@ public class WebSocketFacade extends Endpoint {
                     notificationHandler.notify(notification);
                 }
             });
+
+            this.authToken = authToken;
         } catch (URISyntaxException | DeploymentException | IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
@@ -55,12 +60,22 @@ public class WebSocketFacade extends Endpoint {
 
     }
 
-    public void joinPlayer(int gameID, ChessGame.TeamColor playerColor) {
-
+    public void joinPlayer(int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
+        try {
+            var command = new JoinPlayerCommand(authToken, gameID, playerColor);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
-    public void joinObserver(int gameID) {
-
+    public void joinObserver(int gameID) throws ResponseException {
+        try {
+            var command = new JoinObserverCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
     public void help() throws ResponseException {
