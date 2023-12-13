@@ -18,6 +18,7 @@ public class ChessClient {
     private final String serverUrl;
     private ClientState state = ClientState.LOGGEDOUT;
     private String authToken;
+    private ChessGame game;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         facade = new ServerFacade(serverUrl);
@@ -177,14 +178,20 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <game_id>");
     }
 
-    public String redrawBoard() {
-        return "TODO: finish implementation of redrawBoard\n";
+    public String redrawBoard() throws ResponseException {
+        assertInGame();
+        if (state == ClientState.BLACK) {
+            return new ChessBoardDisplay(game, ChessGame.TeamColor.BLACK).display();
+        } else {
+            return new ChessBoardDisplay(game, ChessGame.TeamColor.WHITE).display();
+        }
     }
 
     public String leave() throws ResponseException {
         assertInGame();
         ws.leave();
         ws = null;
+        game = null;
         state = ClientState.LOGGEDIN;
         return "Successfully left the game.";
     }
@@ -284,5 +291,9 @@ public class ChessClient {
 
     public ClientState getState() {
         return state;
+    }
+
+    public void updateGame(ChessGame game) {
+        this.game = game;
     }
 }
