@@ -44,7 +44,7 @@ public class ChessClient {
                 case "leave" -> leave();
                 case "move" -> makeMove(parameters);
                 case "resign" -> resign();
-                case "highlight" -> highlightLegalMoves();
+                case "highlight" -> highlightLegalMoves(parameters);
                 default -> help();
             };
         } catch (ResponseException e) {
@@ -218,8 +218,19 @@ public class ChessClient {
         return "Successfully resigned.";
     }
 
-    public String highlightLegalMoves() {
-        return "TODO: finish implementation of highlightLegalMoves\n";
+    public String highlightLegalMoves(String ... params) throws ResponseException {
+        assertInGame();
+        if (params.length == 1) {
+            int col = 8 - (params[0].toCharArray()[0] - 'a');
+            int row = params[0].toCharArray()[1] - '0';
+            ChessPosition position = new ChessPositionImpl(row, col);
+            if (state == ClientState.BLACK) {
+                return new ChessBoardDisplay(game, ChessGame.TeamColor.BLACK).highlight(position);
+            } else {
+                return new ChessBoardDisplay(game, ChessGame.TeamColor.WHITE).highlight(position);
+            }
+        }
+        throw new ResponseException(400, "Expected: <piece_position> (e.g., a2)");
     }
 
     public String help() {
