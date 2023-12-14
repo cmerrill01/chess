@@ -73,12 +73,12 @@ public class ChessBoardImpl implements ChessBoard {
                     board[7][i] = new Bishop(ChessGame.TeamColor.WHITE);
                 }
                 case 3 -> {
-                    board[0][i] = new Queen(ChessGame.TeamColor.BLACK);
-                    board[7][i] = new Queen(ChessGame.TeamColor.WHITE);
-                }
-                case 4 -> {
                     board[0][i] = new King(ChessGame.TeamColor.BLACK);
                     board[7][i] = new King(ChessGame.TeamColor.WHITE);
+                }
+                case 4 -> {
+                    board[0][i] = new Queen(ChessGame.TeamColor.BLACK);
+                    board[7][i] = new Queen(ChessGame.TeamColor.WHITE);
                 }
             }
             board[1][i] = new Pawn(ChessGame.TeamColor.BLACK);

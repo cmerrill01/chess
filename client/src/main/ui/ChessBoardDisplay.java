@@ -101,8 +101,8 @@ public class ChessBoardDisplay {
         for (int i = row.length - 1; i >= 0; i--) {
             char token = row[i];
 
-            if ((rowNum + colNum) % 2 == 1) display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-            else display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            if ((rowNum + colNum) % 2 == 1) display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            else display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             if (Character.isUpperCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_RED);
             else if (Character.isLowerCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_BLUE);
 
@@ -138,20 +138,20 @@ public class ChessBoardDisplay {
                 if (positionsToHighlight.contains(new ChessPositionImpl(
                         game.getBoard().getMaxRow() - rowNum, game.getBoard().getMaxColumn() - colNum))
                 ) {
-                    display.append(EscapeSequences.SET_BG_COLOR_GREEN);
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
                 }
                 else {
-                    display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
                 }
             }
             else {
                 if (positionsToHighlight.contains(new ChessPositionImpl(
                         game.getBoard().getMaxRow() - rowNum, game.getBoard().getMaxColumn() - colNum))
                 ) {
-                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                    display.append(EscapeSequences.SET_BG_COLOR_GREEN);
                 }
                 else {
-                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                    display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
                 }
             }
             if (Character.isUpperCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -183,8 +183,8 @@ public class ChessBoardDisplay {
     private static void displayBoardRowBlack(char[] row, int rowNum, StringBuilder display) {
         int colNum = 0;
         for (char token : row) {
-            if ((rowNum + colNum) % 2 == 0) display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-            else display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            if ((rowNum + colNum) % 2 == 0) display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            else display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
             if (Character.isUpperCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_RED);
             else display.append(EscapeSequences.SET_TEXT_COLOR_BLUE);
 
@@ -218,20 +218,20 @@ public class ChessBoardDisplay {
                 if (positionsToHighlight.contains(new ChessPositionImpl(
                         game.getBoard().getMaxRow() - rowNum, colNum + 1))
                 ) {
-                    display.append(EscapeSequences.SET_BG_COLOR_GREEN);
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
                 }
                 else {
-                    display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
                 }
             }
             else {
                 if (positionsToHighlight.contains(new ChessPositionImpl(
                         game.getBoard().getMaxRow() - rowNum, colNum + 1))
                 ) {
-                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                    display.append(EscapeSequences.SET_BG_COLOR_GREEN);
                 }
                 else {
-                    display.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                    display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
                 }
             }
             if (Character.isUpperCase(token)) display.append(EscapeSequences.SET_TEXT_COLOR_RED);
