@@ -158,6 +158,44 @@ public class WebSocketHandler {
                         "%s has made a move: %s", authAccess.findAuthToken(authToken).username(), move.toString())
                 );
                 connections.broadcast(authToken, gameID, messageToOthers);
+                if (game.getStatus() != ChessGame.GameStatus.UNDECIDED) {
+                    NotificationMessage gameOverMessage;
+                    switch (game.getStatus()) {
+                        case DRAW -> gameOverMessage = new NotificationMessage("Stalemate.\nGame over.");
+                        case BLACK_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
+                                "%s is in checkmate.\nGame over: %s wins!", 
+                                gameAccess.findGame(gameID).getWhiteUsername(), 
+                                gameAccess.findGame(gameID).getBlackUsername()
+                        ));
+                        case WHITE_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
+                                "%s is in checkmate.\nGame over: %s wins!",
+                                gameAccess.findGame(gameID).getBlackUsername(),
+                                gameAccess.findGame(gameID).getWhiteUsername()
+                        ));
+                        default -> throw new IllegalStateException("Unexpected game status: " + game.getStatus());
+                    }
+                    connections.broadcast(null, gameID, gameOverMessage);
+                } else {
+                    ChessGame.TeamColor opponentColor = switch (connections.getPlayerColor(authToken)) {
+                        case WHITE -> ChessGame.TeamColor.BLACK;
+                        case BLACK -> ChessGame.TeamColor.WHITE;
+                    };
+                    if (game.isInCheck(opponentColor)) {
+                        NotificationMessage inCheckMessage;
+                        switch (opponentColor) {
+                            case WHITE -> inCheckMessage = new NotificationMessage(String.format(
+                                    "%s is in check.",
+                                    gameAccess.findGame(gameID).getWhiteUsername()
+                            ));
+                            case BLACK -> inCheckMessage = new NotificationMessage(String.format(
+                                    "%s is in check.",
+                                    gameAccess.findGame(gameID).getBlackUsername()
+                            ));
+                            default -> throw new IllegalStateException("Unexpected player color: " + opponentColor);
+                        }
+                        connections.broadcast(null, gameID, inCheckMessage);
+                    }
+                }
             } else {
                 ErrorMessage messageToRoot = new ErrorMessage("Error: Illegal move attempt; not this user's turn.");
                 connections.send(authToken, messageToRoot);
@@ -266,7 +304,10 @@ public class WebSocketHandler {
 
     private boolean gameOver(String authToken, int gameID, GameDAO gameAccess) throws DataAccessException, IOException {
         if (gameAccess.findGame(gameID).getGame().getStatus() != ChessGame.GameStatus.UNDECIDED) {
-            ErrorMessage messageToRoot = new ErrorMessage("Error: This game is over and no moves can be made.");
+            ErrorMessage messageToRoot = new ErrorMessage(String.format(
+                    "Error: This game is over and no moves can be made.\nGame status: %s", 
+                    gameAccess.findGame(gameID).getGame().getStatus())
+            );
             connections.send(authToken, messageToRoot);
             return true;
         }
