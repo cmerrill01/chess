@@ -32,12 +32,12 @@ public interface ChessBoard {
     /**
      * Gets the maximum row number of the board
      */
-    public int getMaxRow();
+    int getMaxRow();
 
     /**
      * Gets the maximum column number of the board
      */
-    public int getMaxColumn();
+    int getMaxColumn();
 
     /**
      * Sets the board to the default starting board

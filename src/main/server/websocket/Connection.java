@@ -8,8 +8,8 @@ import java.io.IOException;
 public class Connection {
     public String authToken;
     public Session session;
-    private int gameId;
-    private ChessGame.TeamColor playerColor;
+    private final int gameId;
+    private final ChessGame.TeamColor playerColor;
 
     public Connection(String authToken, int gameId, Session session) {
         this.authToken = authToken;

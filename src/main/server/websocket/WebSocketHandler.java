@@ -159,41 +159,14 @@ public class WebSocketHandler {
                 );
                 connections.broadcast(authToken, gameID, messageToOthers);
                 if (game.getStatus() != ChessGame.GameStatus.UNDECIDED) {
-                    NotificationMessage gameOverMessage;
-                    switch (game.getStatus()) {
-                        case DRAW -> gameOverMessage = new NotificationMessage("Stalemate.\nGame over.");
-                        case BLACK_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
-                                "%s is in checkmate.\nGame over: %s wins!", 
-                                gameAccess.findGame(gameID).getWhiteUsername(), 
-                                gameAccess.findGame(gameID).getBlackUsername()
-                        ));
-                        case WHITE_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
-                                "%s is in checkmate.\nGame over: %s wins!",
-                                gameAccess.findGame(gameID).getBlackUsername(),
-                                gameAccess.findGame(gameID).getWhiteUsername()
-                        ));
-                        default -> throw new IllegalStateException("Unexpected game status: " + game.getStatus());
-                    }
-                    connections.broadcast(null, gameID, gameOverMessage);
+                    sendGameOverNotification(gameID, game, gameAccess);
                 } else {
                     ChessGame.TeamColor opponentColor = switch (connections.getPlayerColor(authToken)) {
                         case WHITE -> ChessGame.TeamColor.BLACK;
                         case BLACK -> ChessGame.TeamColor.WHITE;
                     };
                     if (game.isInCheck(opponentColor)) {
-                        NotificationMessage inCheckMessage;
-                        switch (opponentColor) {
-                            case WHITE -> inCheckMessage = new NotificationMessage(String.format(
-                                    "%s is in check.",
-                                    gameAccess.findGame(gameID).getWhiteUsername()
-                            ));
-                            case BLACK -> inCheckMessage = new NotificationMessage(String.format(
-                                    "%s is in check.",
-                                    gameAccess.findGame(gameID).getBlackUsername()
-                            ));
-                            default -> throw new IllegalStateException("Unexpected player color: " + opponentColor);
-                        }
-                        connections.broadcast(null, gameID, inCheckMessage);
+                        sendCheckNotification(gameID, opponentColor, gameAccess);
                     }
                 }
             } else {
@@ -322,4 +295,41 @@ public class WebSocketHandler {
         }
         return false;
     }
+
+
+    private void sendCheckNotification(int gameID, ChessGame.TeamColor opponentColor, GameDAO gameAccess) throws DataAccessException, IOException {
+        NotificationMessage inCheckMessage;
+        switch (opponentColor) {
+            case WHITE -> inCheckMessage = new NotificationMessage(String.format(
+                    "%s is in check.",
+                    gameAccess.findGame(gameID).getWhiteUsername()
+            ));
+            case BLACK -> inCheckMessage = new NotificationMessage(String.format(
+                    "%s is in check.",
+                    gameAccess.findGame(gameID).getBlackUsername()
+            ));
+            default -> throw new IllegalStateException("Unexpected player color: " + opponentColor);
+        }
+        connections.broadcast(null, gameID, inCheckMessage);
+    }
+
+    private void sendGameOverNotification(int gameID, ChessGame game, GameDAO gameAccess) throws DataAccessException, IOException {
+        NotificationMessage gameOverMessage;
+        switch (game.getStatus()) {
+            case DRAW -> gameOverMessage = new NotificationMessage("Stalemate.\nGame over.");
+            case BLACK_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
+                    "%s is in checkmate.\nGame over: %s wins!",
+                    gameAccess.findGame(gameID).getWhiteUsername(),
+                    gameAccess.findGame(gameID).getBlackUsername()
+            ));
+            case WHITE_VICTORY -> gameOverMessage = new NotificationMessage(String.format(
+                    "%s is in checkmate.\nGame over: %s wins!",
+                    gameAccess.findGame(gameID).getBlackUsername(),
+                    gameAccess.findGame(gameID).getWhiteUsername()
+            ));
+            default -> throw new IllegalStateException("Unexpected game status: " + game.getStatus());
+        }
+        connections.broadcast(null, gameID, gameOverMessage);
+    }
+
 }

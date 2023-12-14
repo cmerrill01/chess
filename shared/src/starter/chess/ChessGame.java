@@ -10,7 +10,7 @@ import java.util.Collection;
  */
 public interface ChessGame {
 
-    public enum GameStatus {
+    enum GameStatus {
         UNDECIDED,
         WHITE_VICTORY,
         BLACK_VICTORY,

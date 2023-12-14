@@ -19,5 +19,5 @@ public interface ChessPosition {
      */
     int getColumn();
 
-    public boolean onBoard(ChessBoard board);
+    boolean onBoard(ChessBoard board);
 }
